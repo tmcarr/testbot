@@ -30,6 +30,7 @@ use commands::{
     math::*,
     meta::*,
     owner::*,
+    desc::*,
 };
 struct ShardManagerContainer;
 
