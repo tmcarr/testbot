@@ -13,20 +13,15 @@ mod commands;
 use log::{error, info};
 use serenity::{
   client::bridge::gateway::ShardManager,
-  framework::standard::{
-    macros::group, StandardFramework,
-  },
+  framework::standard::{macros::group, DispatchError, StandardFramework},
   model::{event::ResumedEvent, gateway::Ready},
   prelude::*,
 };
 use std::{collections::HashSet, env, sync::Arc};
 
-use commands::{
-  math::*,
-  meta::*,
-  owner::*,
-  desc::*,
-};
+use commands::{desc::*, math::*, meta::*, owner::*};
+
+
 struct ShardManagerContainer;
 
 impl TypeMapKey for ShardManagerContainer {
@@ -81,17 +76,34 @@ fn main() {
 
   client.with_framework(
     StandardFramework::new()
-      .configure(|c| c
-        .on_mention(Some(bot_id))
-        .owners(owners)
-        .prefix("~"))
-      .before(|ctx, msg, command_name| {
+      .configure(|c| c.on_mention(Some(bot_id)).owners(owners).prefix("~"))
+      .before(|_ctx, msg, command_name| {
         println!(
           "Got command '{}' by user '{}': '{}'",
           command_name, msg.author, msg.content,
         );
 
         true // if `before` returns false, command processing doesn't happen.
+      })
+      .unrecognised_command(|ctx, msg, unknown_command_name| {
+        let _ = msg.channel_id.say(
+          &ctx.http,
+          &format!("Could not find command: {}", unknown_command_name),
+        );
+        println!("Could not find command named '{}'", unknown_command_name);
+      })
+      .on_dispatch_error(|ctx, msg, error| {
+        if let DispatchError::Ratelimited(seconds) = error {
+          let _ = msg.channel_id.say(
+            &ctx.http,
+            &format!("Try this again in {} seconds.", seconds),
+          );
+        }
+        if let DispatchError::OnlyForOwners = error {
+          let _ = msg
+            .channel_id
+            .say(&ctx.http, "You dont have permission do to that.");
+        }
       })
       .group(&GENERAL_GROUP),
   );
