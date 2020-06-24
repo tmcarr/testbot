@@ -55,7 +55,7 @@ fn main() {
   // `RUST_LOG` to debug`.
   env_logger::init();
 
-  let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
+  let token = env::var("DISCORD_TOKEN").ok();
 
   let mut client = Client::new(&token, Handler).expect("Err creating client");
 
