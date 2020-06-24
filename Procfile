@@ -1,0 +1,1 @@
+bot: ./target/release/testbot
