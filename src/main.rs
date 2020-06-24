@@ -47,7 +47,7 @@ struct General;
 fn main() {
   // This will load the environment variables located at `./.env`, relative to
   // the CWD. See `./.env.example` for an example on how to structure this.
-  kankyo::load().expect("Failed to load .env file");
+  kankyo::load().ok();
 
   // Initialize the logger to use environment variables.
   //
@@ -55,7 +55,7 @@ fn main() {
   // `RUST_LOG` to debug`.
   env_logger::init();
 
-  let token = env::var("DISCORD_TOKEN").ok();
+  let token = env::var("DISCORD_TOKEN").expect("Failed to load DISCORD_TOKEN from environment.");
 
   let mut client = Client::new(&token, Handler).expect("Err creating client");
 
