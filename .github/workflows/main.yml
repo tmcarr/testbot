@@ -8,10 +8,8 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
     runs-on: ubuntu-latest
-    
     steps:
       - uses: actions/checkout@v1
       - uses: actions-rs/toolchain@v1
@@ -26,6 +24,10 @@ jobs:
             ~/.cargo/git
             target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+  lint:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
       - uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -35,6 +37,10 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: cargo-bloat
         uses: orf/cargo-bloat-action@v1
+  notify:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
       - name: fancier-discord-webhooks
         uses: Slimefun/discord-webhook@1.4
         with:
