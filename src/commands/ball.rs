@@ -29,7 +29,7 @@ fn ball(ctx: &mut Context, msg: &Message) -> CommandResult {
       "You may rely on it."
     ];
 
-    let _ = msg.channel_id.say(&ctx.http, &format!("{:?}", responses.choose(&mut rand::thread_rng())));
+    let _ = msg.channel_id.say(&ctx.http, &format!("{:?}", responses.choose(&mut rand::thread_rng()).unwrap()));
 
     Ok(())
 }
