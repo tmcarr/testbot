@@ -19,7 +19,7 @@ use serenity::{
 };
 use std::{collections::HashSet, env, sync::Arc};
 
-use commands::{ball::*, desc::*, math::*, meta::*, owner::*};
+use commands::{ball::*, desc::*, math::*, meta::*, owner::*, source::*};
 
 
 struct ShardManagerContainer;
