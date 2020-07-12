@@ -19,7 +19,7 @@ use serenity::{
 };
 use std::{collections::HashSet, env, sync::Arc};
 
-use commands::{ball::*, desc::*, math::*, meta::*, owner::*, source::*};
+use commands::{ball::*, desc::*, math::*, meta::*, owner::*, github::*};
 
 
 struct ShardManagerContainer;
@@ -41,7 +41,7 @@ impl EventHandler for Handler {
 }
 
 #[group]
-#[commands(ball, describe, about, add, multiply, ping, quit, source)]
+#[commands(ball, describe, about, add, multiply, ping, quit, github)]
 struct General;
 
 fn main() {
