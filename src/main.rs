@@ -10,10 +10,8 @@
 //! ```
 mod commands;
 
+use dhb_postgres_heroku::{get_pool, HerokuPool};
 use log::{error, info};
-use postgres::NoTls;
-use r2d2_postgres::r2d2::Pool;
-use r2d2_postgres::PostgresConnectionManager;
 use serenity::{
     client::bridge::gateway::ShardManager,
     framework::standard::{macros::group, DispatchError, StandardFramework},
@@ -25,19 +23,16 @@ use std::{collections::HashSet, env, sync::Arc};
 use commands::{ball::*, desc::*, github::*, math::*, meta::*, owner::*};
 
 struct ShardManagerContainer;
-
 impl TypeMapKey for ShardManagerContainer {
     type Value = Arc<Mutex<ShardManager>>;
 }
 
 struct DbClient;
-
 impl TypeMapKey for DbClient {
-    type Value = Pool<PostgresConnectionManager<NoTls>>;
+    type Value = HerokuPool;
 }
 
 struct Handler;
-
 impl EventHandler for Handler {
     fn ready(&self, _: Context, ready: Ready) {
         info!("Connected as {}", ready.user.name);
@@ -64,33 +59,21 @@ fn main() {
     env_logger::init();
 
     let token = env::var("DISCORD_TOKEN").expect("Failed to load DISCORD_TOKEN from environment.");
-    let postgres_host =
-        env::var("POSTGRES_HOST").expect("Failed to load POSTGRES_HOST from environment.");
-    let postgres_port =
-        env::var("POSTGRES_PORT").expect("Failed to load POSTGRES_PORT from environment.");
-    let postgres_user =
-        env::var("POSTGRES_USER").expect("Failed to load POSTGRES_USER from environment.");
-    let postgres_dbname =
-        env::var("POSTGRES_DBNAME").expect("Failed to load POSTGRES_DBNAME from environment.");
-    let postgres_pass =
-        env::var("POSTGRES_PASS").expect("Failed to load POSTGRES_PASS from environment.");
 
-    let mut db_config = postgres::Config::new();
-    db_config
-        .host(&postgres_host)
-        .port(postgres_port.parse::<u16>().unwrap())
-        .user(&postgres_user)
-        .dbname(&postgres_dbname)
-        .password(&postgres_pass);
-    let db_pool_serenity = Pool::new(PostgresConnectionManager::new(db_config, NoTls))
-        .expect("Unable to create postgres connection pool");
+
+    // Database pool setup
+    let database_url =
+        env::var("DATABASE_URL").expect("Failed to load DATABSE_URL from environment.");
+    let max_pool_size = 20;
+    let db_pool = get_pool(&database_url, max_pool_size);
+
 
     let mut client = Client::new(&token, Handler).expect("Err creating client");
 
     {
         let mut data = client.data.write();
         data.insert::<ShardManagerContainer>(Arc::clone(&client.shard_manager));
-        data.insert::<DbClient>(db_pool_serenity);
+        data.insert::<DbClient>(db_pool);
     }
 
     let (owners, bot_id) = match client.cache_and_http.http.get_current_application_info() {
