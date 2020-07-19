@@ -108,6 +108,15 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     steps:
+      - name: Discord Update
+        uses: sarisia/actions-status-discord@v1
+        if: always()
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        with:
+          status: ${{ job.status }}
+          nofail: true
+          username: GitHub Actions
       - name: fancier-discord-webhooks
         uses: Slimefun/discord-webhook@1.4
         with:
