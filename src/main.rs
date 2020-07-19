@@ -33,7 +33,7 @@ impl TypeMapKey for ShardManagerContainer {
 struct DbClient;
 
 impl TypeMapKey for DbClient {
-  type Value = Pool<PostgresConnectionManager<NoTls>>;
+    type Value = Pool<PostgresConnectionManager<NoTls>>;
 }
 
 struct Handler;
@@ -64,26 +64,31 @@ fn main() {
     env_logger::init();
 
     let token = env::var("DISCORD_TOKEN").expect("Failed to load DISCORD_TOKEN from environment.");
-    let postgres_host = env::var("POSTGRES_HOST").expect("Failed to load POSTGRES_HOST from environment.");
-    let postgres_port = env::var("POSTGRES_PORT").expect("Failed to load POSTGRES_PORT from environment.");
-    let postgres_user = env::var("POSTGRES_USER").expect("Failed to load POSTGRES_USER from environment.");
-    let postgres_dbname = env::var("POSTGRES_DBNAME").expect("Failed to load POSTGRES_DBNAME from environment.");
-    let postgres_pass = env::var("POSTGRES_PASS").expect("Failed to load POSTGRES_PASS from environment.");
+    let postgres_host =
+        env::var("POSTGRES_HOST").expect("Failed to load POSTGRES_HOST from environment.");
+    let postgres_port =
+        env::var("POSTGRES_PORT").expect("Failed to load POSTGRES_PORT from environment.");
+    let postgres_user =
+        env::var("POSTGRES_USER").expect("Failed to load POSTGRES_USER from environment.");
+    let postgres_dbname =
+        env::var("POSTGRES_DBNAME").expect("Failed to load POSTGRES_DBNAME from environment.");
+    let postgres_pass =
+        env::var("POSTGRES_PASS").expect("Failed to load POSTGRES_PASS from environment.");
 
     let mut db_config = postgres::Config::new();
     db_config
-         .host(&postgres_host)
-         .port(postgres_port.parse::<u16>().unwrap())
-         .user(&postgres_user)
-         .dbname(&postgres_dbname)
-         .password(&postgres_pass);
+        .host(&postgres_host)
+        .port(postgres_port.parse::<u16>().unwrap())
+        .user(&postgres_user)
+        .dbname(&postgres_dbname)
+        .password(&postgres_pass);
 
     let db_client = db_config
-            .connect(NoTls)
-            .expect("Unable to connect to postgres");
+        .connect(NoTls)
+        .expect("Unable to connect to postgres");
 
     let db_pool_serenity = Pool::new(PostgresConnectionManager::new(db_config, NoTls))
-            .expect("Unable to create postgres connection pool");
+        .expect("Unable to create postgres connection pool");
 
     let mut client = Client::new(&token, Handler).expect("Err creating client");
 
