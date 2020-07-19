@@ -25,6 +25,9 @@ jobs:
           toolchain: nightly
           override: true
 
+      - name: Run cargo bloat
+        uses: orf/cargo-bloat-action@v1
+
       - name: Run cargo check
         uses: actions-rs/cargo@v1
         with:
