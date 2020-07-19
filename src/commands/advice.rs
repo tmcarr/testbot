@@ -1,4 +1,5 @@
-use serde::Deserialize;
+use serde::{Deserialize};
+// use serde_json::{Result};
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
@@ -26,9 +27,8 @@ struct AdviceMessage {
 fn advice(ctx: &mut Context, msg: &Message) -> CommandResult {
     let endpoint = "https://api.adviceslip.com/advice";
     let response = reqwest::blocking::get(endpoint)?;
-
-    let slips: AdviceSlip = response.json()?;
-    let results = format!("{:?}", slips);
+    let slip: AdviceSlip = response.json()?;
+    let results = format!("{:?}", slip);
 
     let _ = msg.channel_id.say(&ctx.http, results);
     Ok(())
