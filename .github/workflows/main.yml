@@ -91,7 +91,7 @@ jobs:
         uses: sarisia/actions-status-discord@v1
         if: always()
         env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
         with:
           status: ${{ job.status }}
           nofail: true
