@@ -6,9 +6,8 @@ use serenity::prelude::*;
 #[aliases("source")]
 fn github(ctx: &mut Context, msg: &Message) -> CommandResult {
     let github = "https://github.com/tmcarr/testbot";
-    let _ = msg.channel_id.say(
-        &ctx.http,
-        &format!("My code is at: {}", &github),
-    );
+    let _ = msg
+        .channel_id
+        .say(&ctx.http, &format!("My code is at: {}", &github));
     Ok(())
 }
