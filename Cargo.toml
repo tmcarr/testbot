@@ -8,12 +8,13 @@ edition = "2018"
 
 [dependencies]
 dhb-postgres-heroku = "0.1.0-alpha.4"
-postgres = "0.17.4"
-r2d2_postgres = "0.16.0"
-rand = "0.7"
-serenity = "0.8"
 env_logger = "0.6"
 kankyo = "0.2"
 log = "0.4"
 pickledb = "0.4.1"
+postgres = "0.17.4"
+r2d2_postgres = "0.16.0"
+rand = "0.7"
+reqwest = "0.10.6"
 serde = { version = "1.0.82", features = ["derive"] }
+serenity = "0.8"
