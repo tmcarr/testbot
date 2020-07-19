@@ -60,13 +60,11 @@ fn main() {
 
     let token = env::var("DISCORD_TOKEN").expect("Failed to load DISCORD_TOKEN from environment.");
 
-
     // Database pool setup
     let database_url =
         env::var("DATABASE_URL").expect("Failed to load DATABSE_URL from environment.");
     let max_pool_size = 20;
     let db_pool = get_pool(&database_url, max_pool_size);
-
 
     let mut client = Client::new(&token, Handler).expect("Err creating client");
 
