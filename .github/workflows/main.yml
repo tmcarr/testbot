@@ -86,7 +86,6 @@ jobs:
 
   notify:
     runs-on: ubuntu-latest
-    needs: build
     steps:
       - name: Discord Update
         uses: sarisia/actions-status-discord@v1
