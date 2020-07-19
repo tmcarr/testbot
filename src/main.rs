@@ -82,11 +82,6 @@ fn main() {
         .user(&postgres_user)
         .dbname(&postgres_dbname)
         .password(&postgres_pass);
-
-    let db_client = db_config
-        .connect(NoTls)
-        .expect("Unable to connect to postgres");
-
     let db_pool_serenity = Pool::new(PostgresConnectionManager::new(db_config, NoTls))
         .expect("Unable to create postgres connection pool");
 
@@ -95,6 +90,7 @@ fn main() {
     {
         let mut data = client.data.write();
         data.insert::<ShardManagerContainer>(Arc::clone(&client.shard_manager));
+        data.insert::<DbClient>(db_pool_serenity);
     }
 
     let (owners, bot_id) = match client.cache_and_http.http.get_current_application_info() {
