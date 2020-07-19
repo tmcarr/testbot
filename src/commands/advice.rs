@@ -27,7 +27,7 @@ fn advice(ctx: &mut Context, msg: &Message) -> CommandResult {
     let endpoint = "https://api.adviceslip.com/advice";
     let response = reqwest::blocking::get(endpoint)?;
 
-    let slips: Vec<AdviceSlip> = response.json()?;
+    let slips: AdviceSlip = response.json()?;
     let results = format!("{:?}", slips);
 
     let _ = msg.channel_id.say(&ctx.http, results);
