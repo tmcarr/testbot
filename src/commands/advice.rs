@@ -13,7 +13,7 @@ struct AdviceSlip {
 struct AdviceSearch {
     total_results: i16,
     query: i16,
-    slips: String,
+    slips: Vec<AdviceSlip>,
 }
 
 #[derive(Deserialize, Debug)]

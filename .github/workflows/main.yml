@@ -76,9 +76,6 @@ jobs:
           command: clippy
           args: -- -D warnings
 
-      - name: Run cargo bloat
-        uses: orf/cargo-bloat-action@v1
-
       - name: Run Audit
         uses: actions-rs/audit-check@v1
         with:
