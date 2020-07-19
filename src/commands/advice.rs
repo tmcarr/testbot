@@ -5,14 +5,14 @@ use serenity::prelude::*;
 
 #[derive(Deserialize, Debug)]
 struct AdviceSlip {
-    slip_id: i16,
+    slip_id: u32,
     advice: String,
 }
 
 #[derive(Deserialize, Debug)]
 struct AdviceSearch {
-    total_results: i16,
-    query: i16,
+    total_results: u32,
+    query: u32,
     slips: Vec<AdviceSlip>,
 }
 
