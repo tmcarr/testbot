@@ -10,6 +10,16 @@ struct AdviceSlip {
     advice: String,
 }
 
+#[command]
+fn advice(ctx: &mut Context, msg: &Message) -> CommandResult {
+    let endpoint = "https://api.adviceslip.com/advice";
+    let slip: AdviceSlip = reqwest::blocking::get(endpoint)?.json()?;
+    let results = format!("{}: {}", slip.slip_id, slip.advice);
+
+    let _ = msg.channel_id.say(&ctx.http, results);
+    Ok(())
+}
+
 #[derive(Deserialize, Debug)]
 struct AdviceSearch {
     total_results: u32,
@@ -21,16 +31,6 @@ struct AdviceSearch {
 struct AdviceMessage {
     r#type: String,
     text: String,
-}
-
-#[command]
-fn advice(ctx: &mut Context, msg: &Message) -> CommandResult {
-    let endpoint = "https://api.adviceslip.com/advice";
-    let slip: AdviceSlip = reqwest::blocking::get(endpoint)?.text()?;
-    let results = format!("{}: {}", slip.slip_id, slip.advice);
-
-    let _ = msg.channel_id.say(&ctx.http, results);
-    Ok(())
 }
 
 #[command]
