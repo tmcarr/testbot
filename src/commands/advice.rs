@@ -4,33 +4,15 @@ use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 
-#[derive(Deserialize, Debug)]
-struct AdviceSlip {
-    id: u32,
-    advice: String,
-}
-
 #[command]
 fn advice(ctx: &mut Context, msg: &Message) -> CommandResult {
     let endpoint = "https://api.adviceslip.com/advice";
-    let slip: AdviceSlip = reqwest::blocking::get(endpoint)?.json()?;
-    let results = format!("{}: {}", slip.id, slip.advice);
+    let result_text = reqwest::blocking::get(endpoint)?.text()?;
+    let result = serde_json::from_str(&result_text)?;
+    let results = format!("{:?}", result);
 
     let _ = msg.channel_id.say(&ctx.http, results);
     Ok(())
-}
-
-#[derive(Deserialize, Debug)]
-struct AdviceSearch {
-    total_results: u32,
-    query: u32,
-    slips: Vec<AdviceSlip>,
-}
-
-#[derive(Deserialize, Debug)]
-struct AdviceMessage {
-    r#type: String,
-    text: String,
 }
 
 #[command]
