@@ -5,9 +5,12 @@ use serenity::prelude::*;
 #[command]
 fn advice(ctx: &mut Context, msg: &Message) -> CommandResult {
     let endpoint = "https://api.adviceslip.com/advice";
-    let result_text = reqwest::blocking::get(endpoint).expect("Failed to get data from endpoint.").text().expect("FAiled to convert body to text");
-    let result = serde_json::from_str(&result_text).expect("json from string failed");
-    let results = format!("{:?}", result);
+    let result_text = reqwest::blocking::get(endpoint)
+        .expect("Failed to get data from endpoint.")
+        .json()
+        .expect("FAiled to convert body to text");
+    // let result = serde_json::from_str(&result_text).expect("json from string failed");
+    let results = format!("{:?}", result_text);
 
     let _ = msg.channel_id.say(&ctx.http, results);
     Ok(())
