@@ -10,7 +10,7 @@
 //! ```
 mod commands;
 
-use dhb_postgres_heroku::{get_pool, HerokuPool};
+// use dhb_postgres_heroku::{get_pool, HerokuPool};
 use log::{error, info};
 use serenity::{
     client::bridge::gateway::ShardManager,
@@ -27,10 +27,10 @@ impl TypeMapKey for ShardManagerContainer {
     type Value = Arc<Mutex<ShardManager>>;
 }
 
-struct DbClient;
-impl TypeMapKey for DbClient {
-    type Value = HerokuPool;
-}
+// struct DbClient;
+// impl TypeMapKey for DbClient {
+//     type Value = HerokuPool;
+// }
 
 struct Handler;
 impl EventHandler for Handler {
@@ -61,17 +61,17 @@ fn main() {
     let token = env::var("DISCORD_TOKEN").expect("Failed to load DISCORD_TOKEN from environment.");
 
     // Database pool setup
-    let database_url =
-        env::var("DATABASE_URL").expect("Failed to load DATABSE_URL from environment.");
-    let max_pool_size = 20;
-    let db_pool = get_pool(&database_url, max_pool_size);
+    // let database_url =
+    //     env::var("DATABASE_URL").expect("Failed to load DATABSE_URL from environment.");
+    // let max_pool_size = 20;
+    // let db_pool = get_pool(&database_url, max_pool_size);
 
     let mut client = Client::new(&token, Handler).expect("Err creating client");
 
     {
         let mut data = client.data.write();
         data.insert::<ShardManagerContainer>(Arc::clone(&client.shard_manager));
-        data.insert::<DbClient>(db_pool);
+        // data.insert::<DbClient>(db_pool);
     }
 
     let (owners, bot_id) = match client.cache_and_http.http.get_current_application_info() {

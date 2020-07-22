@@ -1,4 +1,4 @@
-use crate::DbClient;
+// use crate::DbClient;
 use pickledb::{PickleDb, PickleDbDumpPolicy, SerializationMethod};
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
@@ -8,9 +8,9 @@ use serenity::prelude::*;
 #[command]
 fn describe(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
     let data = ctx.data.read();
-    let _pool = data
-        .get::<DbClient>()
-        .expect("Failed to get database pool from context");
+    // let _pool = data
+    //     .get::<DbClient>()
+    //     .expect("Failed to get database pool from context");
 
     let value = &args.message();
 
