@@ -7,7 +7,7 @@ use serenity::prelude::*;
 // Command to write to DB
 #[command]
 fn describe(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
-    let data = ctx.data.read();
+    // let data = ctx.data.read();
     // let _pool = data
     //     .get::<DbClient>()
     //     .expect("Failed to get database pool from context");
