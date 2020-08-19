@@ -44,7 +44,9 @@ impl EventHandler for Handler {
 }
 
 #[group]
-#[commands(advice, ball, describe, about, add, multiply, ping, quit, github, random)]
+#[commands(
+    advice, ball, describe, about, add, multiply, ping, quit, github, random
+)]
 struct General;
 
 fn main() {
