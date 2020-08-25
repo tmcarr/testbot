@@ -8,9 +8,12 @@ use serenity::prelude::*;
 pub fn random(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
     let choices = args.raw().collect::<Vec<&str>>();
 
-    let _ = msg
-        .channel_id
-        .say(&ctx.http, choices.choose(&mut rand::thread_rng()).unwrap());
+    if let Some(choice) = choices.choose(&mut rand::thread_rng()) {
+      msg.channel_id.say(&ctx.http, choice)?;
+    } else {
+      msg.channel_id.say(&ctx.http, "Why u no args?!")?;
+    }
+
 
     Ok(())
 }

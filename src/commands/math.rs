@@ -17,12 +17,14 @@ pub fn multiply(ctx: &mut Context, msg: &Message, mut args: Args) -> CommandResu
 #[command]
 #[aliases("sum")]
 pub fn add(ctx: &mut Context, msg: &Message, mut args: Args) -> CommandResult {
-    let one = args.single::<f64>().unwrap();
-    let two = args.single::<f64>().unwrap();
-
-    let sum = one + two;
-
-    let _ = msg.channel_id.say(&ctx.http, sum);
+    if args.is_empty() {
+      let _ = msg.channel_id.say(&ctx.http, "Yeah.... I need some numbers.");
+    } else {
+      let one = args.single::<f64>().unwrap();
+      let two = args.single::<f64>().unwrap();
+      let sum = one + two;
+      let _ = msg.channel_id.say(&ctx.http, sum);
+    }
 
     Ok(())
 }
