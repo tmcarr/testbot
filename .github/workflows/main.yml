@@ -10,8 +10,8 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  lints:
-    name: Lints
+  checks:
+    name: Checks
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
@@ -54,7 +54,7 @@ jobs:
 
   notify:
     runs-on: ubuntu-latest
-    needs: [check, test, lints]
+    needs: [checks]
     steps:
       - name: fancier-discord-webhooks
         uses: Slimefun/discord-webhook@1.4
