@@ -1,9 +1,9 @@
 pub mod advice;
 pub mod ball;
 pub mod desc;
+pub mod food;
 pub mod github;
 pub mod math;
 pub mod meta;
 pub mod owner;
 pub mod random;
-pub mod food;

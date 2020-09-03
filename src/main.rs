@@ -20,7 +20,9 @@ use serenity::{
 };
 use std::{collections::HashSet, env, sync::Arc};
 
-use commands::{advice::*, ball::*, desc::*, github::*, math::*, meta::*, owner::*, random::*, food::*};
+use commands::{
+    advice::*, ball::*, desc::*, food::*, github::*, math::*, meta::*, owner::*, random::*,
+};
 
 struct ShardManagerContainer;
 impl TypeMapKey for ShardManagerContainer {
