@@ -4,7 +4,7 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 
 #[command]
-#[aliases("food", "dinner", "lunch", "breakfast", "snack")]
+#[aliases("cuisine", "food", "dinner", "lunch", "breakfast", "snack")]
 fn food(ctx: &mut Context, msg: &Message) -> CommandResult {
     let responses = vec![
         "Asian",
