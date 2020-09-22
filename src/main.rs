@@ -22,6 +22,7 @@ use std::{collections::HashSet, env, sync::Arc};
 
 use commands::{
     advice::*, ball::*, desc::*, food::*, github::*, math::*, meta::*, owner::*, random::*,
+    stonks::*,
 };
 
 struct ShardManagerContainer;
@@ -47,7 +48,7 @@ impl EventHandler for Handler {
 
 #[group]
 #[commands(
-    advice, ball, describe, about, add, multiply, ping, quit, github, random, food
+    advice, ball, describe, about, add, multiply, ping, quit, github, random, food, stonks
 )]
 struct General;
 
