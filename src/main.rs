@@ -21,7 +21,7 @@ use serenity::{
 use std::{collections::HashSet, env, sync::Arc};
 
 use commands::{
-    advice::*, ball::*, desc::*, food::*, github::*, math::*, meta::*, owner::*, random::*,
+    advice::*, ball::*, botsnack::*, desc::*, food::*, github::*, math::*, meta::*, owner::*, random::*,
     stonks::*,
 };
 
@@ -48,7 +48,7 @@ impl EventHandler for Handler {
 
 #[group]
 #[commands(
-    advice, ball, describe, about, add, multiply, ping, quit, github, random, food, stonks
+    advice, ball, botsnack, describe, about, add, multiply, ping, quit, github, random, food, stonks
 )]
 struct General;
 
