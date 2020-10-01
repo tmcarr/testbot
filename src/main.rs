@@ -1,25 +1,21 @@
-//! Requires the 'framework' feature flag be enabled in your project's
-//! `Cargo.toml`.
-//!
-//! This can be enabled by specifying the feature in the dependency section:
-//!
-//! ```toml
-//! [dependencies.serenity]
-//! git = "https://github.com/serenity-rs/serenity.git"
-//! features = ["framework", "standard_framework"]
-//! ```
 mod commands;
 
 // use dhb_postgres_heroku::{get_pool, HerokuPool};
-use log::{error, info};
+use log::error;
 use serenity::{
+    async_trait,
     client::bridge::gateway::ShardManager,
-    framework::standard::{macros::group, DispatchError, StandardFramework},
-    model::{event::ResumedEvent, gateway::Ready},
+    framework::standard::macros::{group, hook},
+    framework::standard::{CommandError, DispatchError},
+    framework::StandardFramework,
+    http::Http,
+    model::{channel::Message, event::ResumedEvent, gateway::Ready},
     prelude::*,
 };
 use std::{collections::HashSet, env, sync::Arc};
+use tracing::{info, instrument};
 
+// Re import advice::*,  when its ready
 use commands::{
     advice::*, ball::*, botsnack::*, desc::*, drink::*, food::*, github::*, math::*, meta::*,
     owner::*, random::*, stonks::*,
@@ -30,22 +26,20 @@ impl TypeMapKey for ShardManagerContainer {
     type Value = Arc<Mutex<ShardManager>>;
 }
 
-// struct DbClient;
-// impl TypeMapKey for DbClient {
-//     type Value = HerokuPool;
-// }
-
 struct Handler;
+
+#[async_trait]
 impl EventHandler for Handler {
-    fn ready(&self, _: Context, ready: Ready) {
+    async fn ready(&self, _: Context, ready: Ready) {
         info!("Connected as {}", ready.user.name);
     }
 
-    fn resume(&self, _: Context, _: ResumedEvent) {
+    async fn resume(&self, _: Context, _: ResumedEvent) {
         info!("Resumed");
     }
 }
 
+// Remember to re-add advice here when its ready.
 #[group]
 #[commands(
     advice, ball, botsnack, describe, drink, about, add, multiply, ping, quit, github, random,
@@ -53,9 +47,59 @@ impl EventHandler for Handler {
 )]
 struct General;
 
-fn main() {
+#[tokio::main]
+#[instrument]
+async fn main() {
+    #[hook]
+    #[instrument]
+    async fn before_hook(_: &Context, msg: &Message, cmd_name: &str) -> bool {
+        println!(
+            "Got command '{}' by user '{}': '{}'",
+            cmd_name, msg.author, msg.content
+        );
+        true
+    };
+
+    #[hook]
+    async fn unrecognized_command_hook(ctx: &Context, msg: &Message, cmd_name: &str) {
+        let _ = msg
+            .channel_id
+            .say(ctx, format!("Unrecognized command: '{}'", cmd_name))
+            .await;
+        println!(
+            "A user named {:?} tried to executute an unknown command: {}",
+            msg.author.name, cmd_name
+        );
+    };
+
+    #[hook]
+    async fn dispatch_error_hook(context: &Context, msg: &Message, error: DispatchError) {
+        match error {
+            DispatchError::NotEnoughArguments { min, given } => {
+                let s = format!("Need {} arguments, but only got {}.", min, given);
+
+                let _ = msg.channel_id.say(&context, &s).await;
+            }
+            DispatchError::TooManyArguments { max, given } => {
+                let s = format!("Max arguments allowed is {}, but got {}.", max, given);
+
+                let _ = msg.channel_id.say(&context, &s).await;
+            }
+            _ => println!("Unhandled dispatch error."),
+        }
+    };
+
+    #[hook]
+    #[instrument]
+    async fn after_hook(_: &Context, _: &Message, cmd_name: &str, error: Result<(), CommandError>) {
+        //  Print out an error if it happened
+        if let Err(why) = error {
+            println!("Error in {}: {:?}", cmd_name, why);
+        }
+    };
+
     // This will load the environment variables located at `./.env`, relative to
-    // the CWD. See `./.env.example` for an example on how to structure this.
+    // the CWD.
     kankyo::load().ok();
 
     // Initialize the logger to use environment variables.
@@ -66,64 +110,45 @@ fn main() {
 
     let token = env::var("DISCORD_TOKEN").expect("Failed to load DISCORD_TOKEN from environment.");
 
-    // Database pool setup
-    // let database_url =
-    //     env::var("DATABASE_URL").expect("Failed to load DATABSE_URL from environment.");
-    // let max_pool_size = 20;
-    // let db_pool = get_pool(&database_url, max_pool_size);
+    let http = Http::new_with_token(&token);
 
-    let mut client = Client::new(&token, Handler).expect("Err creating client");
-
-    {
-        let mut data = client.data.write();
-        data.insert::<ShardManagerContainer>(Arc::clone(&client.shard_manager));
-        // data.insert::<DbClient>(db_pool);
-    }
-
-    let (owners, bot_id) = match client.cache_and_http.http.get_current_application_info() {
+    // We will fetch your bot's owners and id
+    let (owners, _bot_id) = match http.get_current_application_info().await {
         Ok(info) => {
             let mut owners = HashSet::new();
             owners.insert(info.owner.id);
 
             (owners, info.id)
         }
-        Err(why) => panic!("Couldn't get application info: {:?}", why),
+        Err(why) => panic!("Could not access application info: {:?}", why),
     };
 
-    client.with_framework(
-        StandardFramework::new()
-            .configure(|c| c.on_mention(Some(bot_id)).owners(owners).prefix("~"))
-            .before(|_ctx, msg, command_name| {
-                println!(
-                    "Got command '{}' by user '{}': '{}'",
-                    command_name, msg.author, msg.content,
-                );
-                true // if `before` returns false, command processing doesn't happen.
-            })
-            .unrecognised_command(|ctx, msg, unknown_command_name| {
-                let _ = msg.channel_id.say(
-                    &ctx.http,
-                    &format!("Could not find command: {}", unknown_command_name),
-                );
-                println!("Could not find command named '{}'", unknown_command_name);
-            })
-            .on_dispatch_error(|ctx, msg, error| {
-                if let DispatchError::Ratelimited(seconds) = error {
-                    let _ = msg.channel_id.say(
-                        &ctx.http,
-                        &format!("Try this again in {} seconds.", seconds),
-                    );
-                }
-                if let DispatchError::OnlyForOwners = error {
-                    let _ = msg
-                        .channel_id
-                        .say(&ctx.http, "You dont have permission do to that.");
-                }
-            })
-            .group(&GENERAL_GROUP),
-    );
+    // Create the framework
+    let framework = StandardFramework::new()
+        .configure(|c| {
+            c.owners(owners).prefix("~")
+            // .on_mention(Some(_bot_id))
+            // .ignore_webhooks(true)
+            // .ignore_bots(true)
+        })
+        .before(before_hook)
+        .after(after_hook)
+        .unrecognised_command(unrecognized_command_hook)
+        .on_dispatch_error(dispatch_error_hook)
+        .group(&GENERAL_GROUP);
 
-    if let Err(why) = client.start() {
+    let mut client = Client::new(&token)
+        .framework(framework)
+        .event_handler(Handler)
+        .await
+        .expect("Err creating client");
+
+    {
+        let mut data = client.data.write().await;
+        data.insert::<ShardManagerContainer>(client.shard_manager.clone());
+    };
+
+    if let Err(why) = client.start().await {
         error!("Client error: {:?}", why);
-    }
+    };
 }

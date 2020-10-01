@@ -4,7 +4,7 @@ use serenity::prelude::*;
 
 #[command]
 #[aliases("stocks", "stock", "price")]
-fn stonks(ctx: &mut Context, msg: &Message, mut args: Args) -> CommandResult {
+async fn stonks(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     for stonk in args.iter::<String>() {
         let _ = msg.channel_id.say(
             &ctx.http,

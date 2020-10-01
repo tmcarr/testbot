@@ -4,7 +4,7 @@ use serenity::prelude::*;
 
 #[command]
 #[aliases("source")]
-fn github(ctx: &mut Context, msg: &Message) -> CommandResult {
+async fn github(ctx: &Context, msg: &Message) -> CommandResult {
     let github = "https://github.com/tmcarr/testbot";
     let _ = msg
         .channel_id

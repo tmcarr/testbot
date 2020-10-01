@@ -5,7 +5,7 @@ use serenity::prelude::*;
 
 #[command]
 #[aliases("8ball")]
-fn ball(ctx: &mut Context, msg: &Message) -> CommandResult {
+async fn ball(ctx: &Context, msg: &Message) -> CommandResult {
     let responses = vec![
         "As I see it, yes.",
         "Ask again later.",
@@ -29,10 +29,9 @@ fn ball(ctx: &mut Context, msg: &Message) -> CommandResult {
         "You may rely on it.",
     ];
 
-    let _ = msg.channel_id.say(
-        &ctx.http,
-        responses.choose(&mut rand::thread_rng()).unwrap(),
-    );
+    let choice = responses.choose(&mut rand::thread_rng()).unwrap();
+
+    let _ = msg.channel_id.say(&ctx.http, choice).await;
 
     Ok(())
 }

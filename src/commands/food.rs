@@ -5,7 +5,7 @@ use serenity::prelude::*;
 
 #[command]
 #[aliases("cuisine", "food", "dinner", "lunch", "breakfast", "snack")]
-fn food(ctx: &mut Context, msg: &Message) -> CommandResult {
+async fn food(ctx: &Context, msg: &Message) -> CommandResult {
     let responses = vec![
         "Asian",
         "Barbecue",
