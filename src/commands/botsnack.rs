@@ -8,10 +8,7 @@ async fn botsnack(ctx: &Context, msg: &Message) -> CommandResult {
     let responses = vec!["Yum!", "*cronch*", "MOAR", "*Smiles*"];
     let response = responses.choose(&mut rand::thread_rng()).unwrap();
 
-    let _ = msg.channel_id.say(
-        &ctx.http,
-        response,
-    ).await;
+    let _ = msg.channel_id.say(&ctx.http, response).await;
 
     Ok(())
 }
