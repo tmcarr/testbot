@@ -6,7 +6,7 @@ use serenity::prelude::*;
 
 // Command to write to DB
 #[command]
-fn describe(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
+async fn describe(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     // let data = ctx.data.read();
     // let _pool = data
     //     .get::<DbClient>()
@@ -31,7 +31,7 @@ fn describe(ctx: &mut Context, msg: &Message, args: Args) -> CommandResult {
 
 // Command to read from DB
 #[command]
-fn about(ctx: &mut Context, msg: &Message, mut args: Args) -> CommandResult {
+async fn about(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let user = &args.single_quoted::<String>().unwrap();
 
     let db = PickleDb::load(
