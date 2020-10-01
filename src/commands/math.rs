@@ -3,19 +3,25 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 
 #[command]
+#[aliases("mult", "*")]
 async fn multiply(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-    let one = args.single::<f64>().unwrap();
-    let two = args.single::<f64>().unwrap();
-
-    let product = one * two;
-
-    let _ = msg.channel_id.say(&ctx.http, product).await;
+    if args.is_empty() {
+        let _ = msg
+            .channel_id
+            .say(&ctx.http, "Yeah.... I need some numbers.")
+            .await;
+    } else {
+        let one = args.single::<f64>().unwrap();
+        let two = args.single::<f64>().unwrap();
+        let product = one * two;
+        let _ = msg.channel_id.say(&ctx.http, product).await;
+    }
 
     Ok(())
 }
 
 #[command]
-#[aliases("sum")]
+#[aliases("sum", "+")]
 async fn add(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     if args.is_empty() {
         let _ = msg
