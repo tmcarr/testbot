@@ -22,10 +22,13 @@ async fn describe(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     .unwrap();
 
     db.set(&String::from(&msg.author.name), value).unwrap();
-    let _ = msg.channel_id.say(
-        &ctx.http,
-        &format!("Set {}'s description to: '{}'", &msg.author.name, value),
-    ).await;
+    let _ = msg
+        .channel_id
+        .say(
+            &ctx.http,
+            &format!("Set {}'s description to: '{}'", &msg.author.name, value),
+        )
+        .await;
     Ok(())
 }
 
@@ -43,10 +46,13 @@ async fn about(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     let description = db.get::<String>(user).unwrap();
 
-    let _ = msg.channel_id.say(
-        &ctx.http,
-        &format!("{} is decribed as: '{}'", user, description),
-    ).await;
+    let _ = msg
+        .channel_id
+        .say(
+            &ctx.http,
+            &format!("{} is decribed as: '{}'", user, description),
+        )
+        .await;
 
     Ok(())
 }
