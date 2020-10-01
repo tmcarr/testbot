@@ -20,7 +20,7 @@ async fn add(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     if args.is_empty() {
         let _ = msg
             .channel_id
-            .say(&ctx.http, "Yeah.... I need some numbers.");
+            .say(&ctx.http, "Yeah.... I need some numbers.").await;
     } else {
         let one = args.single::<f64>().unwrap();
         let two = args.single::<f64>().unwrap();

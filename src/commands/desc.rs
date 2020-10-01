@@ -25,7 +25,7 @@ async fn describe(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let _ = msg.channel_id.say(
         &ctx.http,
         &format!("Set {}'s description to: '{}'", &msg.author.name, value),
-    );
+    ).await;
     Ok(())
 }
 
@@ -46,7 +46,7 @@ async fn about(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let _ = msg.channel_id.say(
         &ctx.http,
         &format!("{} is decribed as: '{}'", user, description),
-    );
+    ).await;
 
     Ok(())
 }
