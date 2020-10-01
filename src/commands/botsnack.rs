@@ -6,11 +6,12 @@ use serenity::prelude::*;
 #[command]
 async fn botsnack(ctx: &Context, msg: &Message) -> CommandResult {
     let responses = vec!["Yum!", "*cronch*", "MOAR", "*Smiles*"];
+    let response = responses.choose(&mut rand::thread_rng()).unwrap();
 
     let _ = msg.channel_id.say(
         &ctx.http,
-        responses.choose(&mut rand::thread_rng()).unwrap(),
-    );
+        response,
+    ).await;
 
     Ok(())
 }
