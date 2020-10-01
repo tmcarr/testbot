@@ -9,7 +9,7 @@ async fn multiply(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
 
     let product = one * two;
 
-    let _ = msg.channel_id.say(&ctx.http, product);
+    let _ = msg.channel_id.say(&ctx.http, product).await;
 
     Ok(())
 }
@@ -25,7 +25,7 @@ async fn add(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         let one = args.single::<f64>().unwrap();
         let two = args.single::<f64>().unwrap();
         let sum = one + two;
-        let _ = msg.channel_id.say(&ctx.http, sum);
+        let _ = msg.channel_id.say(&ctx.http, sum).await;
     }
 
     Ok(())

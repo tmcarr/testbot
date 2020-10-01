@@ -12,7 +12,7 @@ async fn stonks(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                 "https://www.finviz.com/chart.ashx?t={}&ty=c&ta=1&p=d&s=l",
                 &stonk.unwrap()
             ),
-        );
+        ).await;
     }
     Ok(())
 }
