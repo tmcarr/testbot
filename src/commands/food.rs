@@ -20,13 +20,9 @@ async fn food(ctx: &Context, msg: &Message) -> CommandResult {
         "Cajun",
     ];
 
-    let _ = msg
-        .channel_id
-        .say(
-            &ctx.http,
-            responses.choose(&mut rand::thread_rng()).unwrap(),
-        )
-        .await;
+    let item = responses.choose(&mut rand::thread_rng()).unwrap();
+
+    let _ = msg.channel_id.say(&ctx.http, item).await;
 
     Ok(())
 }
