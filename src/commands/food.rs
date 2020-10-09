@@ -5,7 +5,7 @@ use serenity::prelude::*;
 
 #[command]
 #[aliases("cuisine", "food", "dinner", "lunch", "breakfast", "snack")]
-fn food(ctx: &mut Context, msg: &Message) -> CommandResult {
+async fn food(ctx: &Context, msg: &Message) -> CommandResult {
     let responses = vec![
         "Asian",
         "Barbecue",
@@ -20,10 +20,9 @@ fn food(ctx: &mut Context, msg: &Message) -> CommandResult {
         "Cajun",
     ];
 
-    let _ = msg.channel_id.say(
-        &ctx.http,
-        responses.choose(&mut rand::thread_rng()).unwrap(),
-    );
+    let item = responses.choose(&mut rand::thread_rng()).unwrap();
+
+    let _ = msg.channel_id.say(&ctx.http, item).await;
 
     Ok(())
 }
