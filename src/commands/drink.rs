@@ -15,6 +15,12 @@ fn drink(ctx: &mut Context, msg: &Message) -> CommandResult {
         "Sparking Water",
         "Seltzer Water",
         "Tap Water",
+        "Gravy",
+        "Rum",
+        "Margarita",
+        "Moscow Mule",
+        "Prairie Oyster",
+        "Pickle Juice",
     ];
 
     if let Err(e) = msg.channel_id.say(
