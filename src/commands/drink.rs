@@ -1,11 +1,11 @@
 use rand::seq::SliceRandom;
-use serenity::framework::standard::{macros::command, CommandError, CommandResult};
+use serenity::framework::standard::{macros::command, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 
 #[command]
-#[aliases("drink", "drinks")]
-fn drink(ctx: &mut Context, msg: &Message) -> CommandResult {
+#[aliases("drink", "drinks", "drank")]
+async fn drink(ctx: &Context, msg: &Message) -> CommandResult {
     let responses = vec![
         "Water.",
         "Topo Chico",
@@ -23,11 +23,9 @@ fn drink(ctx: &mut Context, msg: &Message) -> CommandResult {
         "Agua",
     ];
 
-    if let Err(e) = msg.channel_id.say(
-        &ctx.http,
-        responses.choose(&mut rand::thread_rng()).unwrap(),
-    ) {
-        return Err(CommandError::from(e));
-    }
+    let drink = responses.choose(&mut rand::thread_rng()).unwrap();
+
+    let _ = msg.channel_id.say(&ctx.http, drink).await;
+
     Ok(())
 }

@@ -17,8 +17,8 @@ use tracing::{info, instrument};
 
 // Re import advice::*,  when its ready
 use commands::{
-    advice::*, ball::*, botsnack::*, desc::*, drink::*, food::*, github::*, math::*, meta::*,
-    owner::*, random::*, stonks::*,
+    ball::*, botsnack::*, desc::*, drink::*, food::*, github::*, math::*, meta::*, owner::*,
+    random::*, stonks::*,
 };
 
 struct ShardManagerContainer;
@@ -42,8 +42,7 @@ impl EventHandler for Handler {
 // Remember to re-add advice here when its ready.
 #[group]
 #[commands(
-    advice, ball, botsnack, describe, drink, about, add, multiply, ping, quit, github, random,
-    food, stonks
+    ball, botsnack, describe, drink, about, add, multiply, ping, quit, github, random, food, stonks
 )]
 struct General;
 

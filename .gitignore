@@ -12,3 +12,6 @@ Cargo.lock
 # Ignore my local state
 .env
 testbot.db
+
+# Ignore .vscode
+.vscode
