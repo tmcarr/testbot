@@ -21,8 +21,8 @@ use serenity::{
 use std::{collections::HashSet, env, sync::Arc};
 
 use commands::{
-    advice::*, ball::*, botsnack::*, desc::*, food::*, github::*, math::*, meta::*, owner::*,
-    random::*, stonks::*,
+    advice::*, ball::*, botsnack::*, desc::*, drink::*, food::*, github::*, math::*, meta::*,
+    owner::*, random::*, stonks::*,
 };
 
 struct ShardManagerContainer;
@@ -48,8 +48,8 @@ impl EventHandler for Handler {
 
 #[group]
 #[commands(
-    advice, ball, botsnack, describe, about, add, multiply, ping, quit, github, random, food,
-    stonks
+    advice, ball, botsnack, describe, drink, about, add, multiply, ping, quit, github, random,
+    food, stonks
 )]
 struct General;
 
