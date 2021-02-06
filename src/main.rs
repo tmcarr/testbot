@@ -42,7 +42,8 @@ impl EventHandler for Handler {
 // Remember to re-add advice here when its ready.
 #[group]
 #[commands(
-    ball, botsnack, describe, drink, about, add, multiply, ping, quit, github, random, food, stonks
+    ball, botsnack, describe, drink, about, add, multiply, ping, quit, github, random, food,
+    stonkcomp, stonks
 )]
 struct General;
 
