@@ -10,10 +10,7 @@ async fn stonks(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             .channel_id
             .say(
                 &ctx.http,
-                &format!(
-                    "https://stonks.egd.pw/spcomp?symbol={}",
-                    &stonk.unwrap()
-                ),
+                &format!("https://stonks.egd.pw/spcomp?symbol={}", &stonk.unwrap()),
             )
             .await;
     }
