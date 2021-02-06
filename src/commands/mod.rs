@@ -9,4 +9,5 @@ pub mod math;
 pub mod meta;
 pub mod owner;
 pub mod random;
+pub mod stonkcomp;
 pub mod stonks;

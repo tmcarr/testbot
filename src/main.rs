@@ -18,7 +18,7 @@ use tracing::{info, instrument};
 // Re import advice::*,  when its ready
 use commands::{
     ball::*, botsnack::*, desc::*, drink::*, food::*, github::*, math::*, meta::*, owner::*,
-    random::*, stonks::*,
+    random::*, stonkcomp::*, stonks::*,
 };
 
 struct ShardManagerContainer;
