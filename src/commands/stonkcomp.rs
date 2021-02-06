@@ -4,7 +4,7 @@ use serenity::prelude::*;
 
 #[command]
 #[aliases("stockcomp", "stonkcomp", "s&pcomp")]
-async fn stonks(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+async fn stonkcomp(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     for stonk in args.iter::<String>() {
         let _ = msg
             .channel_id
