@@ -58,7 +58,7 @@ async fn main() {
             cmd_name, msg.author, msg.content
         );
         true
-    };
+    }
 
     #[hook]
     async fn unrecognized_command_hook(ctx: &Context, msg: &Message, cmd_name: &str) {
@@ -70,7 +70,7 @@ async fn main() {
             "A user named {:?} tried to executute an unknown command: {}",
             msg.author.name, cmd_name
         );
-    };
+    }
 
     #[hook]
     async fn dispatch_error_hook(context: &Context, msg: &Message, error: DispatchError) {
@@ -87,7 +87,7 @@ async fn main() {
             }
             _ => println!("Unhandled dispatch error."),
         }
-    };
+    }
 
     #[hook]
     #[instrument]
@@ -96,7 +96,7 @@ async fn main() {
         if let Err(why) = error {
             println!("Error in {}: {:?}", cmd_name, why);
         }
-    };
+    }
 
     // This will load the environment variables located at `./.env`, relative to
     // the CWD.
@@ -138,7 +138,7 @@ async fn main() {
         .on_dispatch_error(dispatch_error_hook)
         .group(&GENERAL_GROUP);
 
-    let mut client = Client::new(&token)
+    let mut client = Client::builder(&token)
         .framework(framework)
         .event_handler(Handler)
         .await
