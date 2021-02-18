@@ -125,13 +125,14 @@ async fn main() {
 
     // Create the framework
     let framework = StandardFramework::new()
-        .configure(|c| c.owners(owners)
+        .configure(|c| {
+            c.owners(owners)
                 .prefix("~")
                 .on_mention(Some(_bot_id))
                 .ignore_webhooks(true)
                 .ignore_bots(true)
                 .case_insensitivity(true)
-        )
+        })
         .before(before_hook)
         .after(after_hook)
         .unrecognised_command(unrecognized_command_hook)
