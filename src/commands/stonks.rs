@@ -3,7 +3,7 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 
 #[command]
-#[aliases("stocks", "stock", "price")]
+#[aliases("stocks", "stock", "price", "stonks", "stonk")]
 async fn stonks(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     for stonk in args.iter::<String>() {
         let _ = msg
