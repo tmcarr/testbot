@@ -16,8 +16,8 @@ struct Advice {
 
 #[command]
 async fn advice(ctx: &Context, msg: &Message) -> CommandResult {
-    let endpoint = "https://api.adviceslip.com/advice";
-    let result_text = reqwest::get(endpoint).await?.json::<Advice>().await?;
+    const endpoint: String = "https://api.adviceslip.com/advice";
+    let result_text = reqwest::get(&endpoint).await?.json::<Advice>().await?;
     let results = format!("{} - #{}", result_text.slip.advice, result_text.slip.id);
 
     let _ = msg.channel_id.say(&ctx.http, results).await;
