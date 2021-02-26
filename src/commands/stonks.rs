@@ -88,6 +88,7 @@ async fn price(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let price = result_text.quote.price.parse::<f32>().unwrap();
     let results = format!("Last Price: {}", price);
 
-    let _ = msg.channel_id.say(&ctx.http, results).await;
+    let _ = msg.channel_id.say(&ctx.http, results).await?;
+
     Ok(())
 }
