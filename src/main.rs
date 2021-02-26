@@ -62,10 +62,18 @@ async fn main() {
 
     #[hook]
     async fn unrecognized_command_hook(ctx: &Context, msg: &Message, cmd_name: &str) {
-        let _ = msg
-            .channel_id
-            .say(ctx, format!("Unrecognized command: '{}'", cmd_name))
-            .await;
+        match cmd_name.chars().next() {
+            Some(x) if x.is_alphabetic() => {
+                let _ = msg
+                    .channel_id
+                    .say(ctx, format!("Unrecognized command: '{}'", cmd_name))
+                    .await;
+            }
+
+            // ignore any bad "commands" that aren't alphabetic
+            _ => {}
+        };
+
         println!(
             "A user named {:?} tried to executute an unknown command: {}",
             msg.author.name, cmd_name
