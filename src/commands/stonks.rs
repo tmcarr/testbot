@@ -48,7 +48,7 @@ struct Quote {
     // hight: i32,
     // #[serde(rename="04. low")]
     // low: i32,
-    #[serde(rename="05. price")]
+    #[serde(rename = "05. price")]
     price: String,
     // #[serde(rename="06. volume")]
     // volume: u64,
@@ -64,15 +64,18 @@ struct Quote {
 
 #[derive(Deserialize)]
 struct GlobalQuote {
-  #[serde(rename="Global Quote")]
-  quote: Quote
+    #[serde(rename = "Global Quote")]
+    quote: Quote,
 }
 
 #[command]
 #[aliases("sprice", "stonkprice", "stockprice")]
 async fn price(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let ticker = args.single::<String>().unwrap();
-    let endpoint = format!("https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={}&apikey=SNIPPED", ticker);
+    let endpoint = format!(
+        "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={}&apikey=SNIPPED",
+        ticker
+    );
     let result_text = reqwest::get(&endpoint).await?.json::<GlobalQuote>().await?;
     let price = result_text.quote.price.parse::<f32>().unwrap();
     let results = format!("Last Price: {}", price);
