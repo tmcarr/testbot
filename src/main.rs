@@ -100,7 +100,7 @@ async fn main() {
 
     // This will load the environment variables located at `./.env`, relative to
     // the CWD.
-    kankyo::load().ok();
+    kankyo::init().ok();
 
     // Initialize the logger to use environment variables.
     //
