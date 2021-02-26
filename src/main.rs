@@ -17,13 +17,18 @@ use tracing::{info, instrument};
 
 // Re import advice::*,  when its ready
 use commands::{
-    ball::*, botsnack::*, desc::*, drink::*, food::*, github::*, math::*, meta::*, owner::*,
-    random::*, stonkcomp::*, stonks::*,
+    advice::*, ball::*, botsnack::*, desc::*, drink::*, food::*, github::*, math::*, meta::*,
+    owner::*, random::*, stonkcomp::*, stonks::*,
 };
 
 struct ShardManagerContainer;
 impl TypeMapKey for ShardManagerContainer {
     type Value = Arc<Mutex<ShardManager>>;
+}
+
+struct AlphaVantageAPIToken;
+impl TypeMapKey for AlphaVantageAPIToken {
+    type Value = String;
 }
 
 struct Handler;
@@ -42,8 +47,8 @@ impl EventHandler for Handler {
 // Remember to re-add advice here when its ready.
 #[group]
 #[commands(
-    ball, botsnack, describe, drink, about, add, multiply, ping, quit, github, random, food,
-    stonkcomp, stonks
+    advice, ball, botsnack, describe, drink, about, add, multiply, ping, quit, github, random,
+    food, stonkcomp, stonks, price
 )]
 struct General;
 
@@ -117,7 +122,8 @@ async fn main() {
     env_logger::init();
 
     let token = env::var("DISCORD_TOKEN").expect("Failed to load DISCORD_TOKEN from environment.");
-
+    let alphavantage_token =
+        env::var("ALPHAVANTAGE").expect("Failed to retrieve alphavantage API token.");
     let http = Http::new_with_token(&token);
 
     // We will fetch your bot's owners and id
@@ -156,6 +162,7 @@ async fn main() {
     {
         let mut data = client.data.write().await;
         data.insert::<ShardManagerContainer>(client.shard_manager.clone());
+        data.insert::<AlphaVantageAPIToken>(alphavantage_token)
     };
 
     if let Err(why) = client.start().await {
