@@ -3,6 +3,8 @@ use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
 
+use crate::AlphaVantageAPIToken;
+
 #[command]
 #[aliases("stocks", "stock", "stonks", "stonk")]
 async fn stonks(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
@@ -71,10 +73,16 @@ struct GlobalQuote {
 #[command]
 #[aliases("sprice", "stonkprice", "stockprice")]
 async fn price(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    // Read our API token out of the ctx
+    let data_read = ctx.data.read().await;
+    let api_token = data_read
+        .get::<AlphaVantageAPIToken>()
+        .expect("Expected an AlphaVantage API token in the context.");
+
     let ticker = args.single::<String>().unwrap();
     let endpoint = format!(
-        "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={}&apikey=SNIPPED",
-        ticker
+        "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={}&apikey={}",
+        ticker, api_token
     );
     let result_text = reqwest::get(&endpoint).await?.json::<GlobalQuote>().await?;
     let price = result_text.quote.price.parse::<f32>().unwrap();

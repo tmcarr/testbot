@@ -26,6 +26,11 @@ impl TypeMapKey for ShardManagerContainer {
     type Value = Arc<Mutex<ShardManager>>;
 }
 
+struct AlphaVantageAPIToken;
+impl TypeMapKey for AlphaVantageAPIToken {
+    type Value = String;
+}
+
 struct Handler;
 
 #[async_trait]
@@ -117,7 +122,8 @@ async fn main() {
     env_logger::init();
 
     let token = env::var("DISCORD_TOKEN").expect("Failed to load DISCORD_TOKEN from environment.");
-
+    let alphavantage_token =
+        env::var("ALPHAVANTAGE").expect("Failed to retrieve alphavantage API token.");
     let http = Http::new_with_token(&token);
 
     // We will fetch your bot's owners and id
@@ -156,6 +162,7 @@ async fn main() {
     {
         let mut data = client.data.write().await;
         data.insert::<ShardManagerContainer>(client.shard_manager.clone());
+        data.insert::<AlphaVantageAPIToken>(alphavantage_token)
     };
 
     if let Err(why) = client.start().await {
