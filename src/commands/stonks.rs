@@ -86,7 +86,7 @@ async fn price(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     );
     let globalquote = reqwest::get(&endpoint).await?.json::<GlobalQuote>().await?;
     let price = match globalquote.quote.price.parse::<f32>() {
-        Ok(price)  => format!("Last Price: {}", price),
+        Ok(price) => format!("Last Price: {}", price),
         Err(e) => format!("Failed to get stock price: {}", e),
     };
 
