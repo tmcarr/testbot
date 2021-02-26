@@ -84,11 +84,13 @@ async fn price(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={}&apikey={}",
         ticker, api_token
     );
-    let result_text = reqwest::get(&endpoint).await?.json::<GlobalQuote>().await?;
-    let price = result_text.quote.price.parse::<f32>().unwrap();
-    let results = format!("Last Price: {}", price);
+    let globalquote = reqwest::get(&endpoint).await?.json::<GlobalQuote>().await?;
+    let price = match globalquote.quote.price.parse::<f32>() {
+        Ok(price)  => format!("Last Price: {}", price),
+        Err(e) => format!("Failed to get stock price: {}", e),
+    };
 
-    let _ = msg.channel_id.say(&ctx.http, results).await?;
+    let _ = msg.channel_id.say(&ctx.http, price).await?;
 
     Ok(())
 }
