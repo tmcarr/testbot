@@ -43,7 +43,7 @@ impl EventHandler for Handler {
 #[group]
 #[commands(
     advice, ball, botsnack, describe, drink, about, add, multiply, ping, quit, github, random,
-    food, stonkcomp, stonks
+    food, stonkcomp, stonks, price
 )]
 struct General;
 
