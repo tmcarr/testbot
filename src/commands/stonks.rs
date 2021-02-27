@@ -102,14 +102,14 @@ async fn price(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         .push_mono_line(format!("{:<15}{:<20}", "Low:", globalquote.quote.low))
         .push_mono_line(format!("{:<15}{:<20}", "Price:", globalquote.quote.price))
         .push_mono_line(format!("{:<15}{:<20}", "Volume:", globalquote.quote.volume))
-        .push_mono_line(format!(
-            "{:<15}{:<20}",
-            "Prev. Close:", globalquote.quote.prev_close
-        ))
         .push_mono_line(format!("{:<15}{:<20}", "Change:", globalquote.quote.change))
         .push_mono_line(format!(
             "{:<15}{:<20}",
-            "Change %:", globalquote.quote.change_pct
+            "% Change:", globalquote.quote.change_pct
+        ))
+        .push_mono_line(format!(
+            "{:<15}{:<20}",
+            "Prev. Close:", globalquote.quote.prev_close
         ))
         .push_mono_line(format!(
             "{:<15}{:<20}",
