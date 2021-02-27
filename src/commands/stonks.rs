@@ -96,10 +96,7 @@ struct GlobalQuote {
 #[command]
 #[aliases("sprice", "stonkprice", "stockprice")]
 async fn price(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-    let data_read = ctx.data.read().await;
-    let api_token = data_read
-        .get::<AlphaVantageAPIToken>()
-        .expect("Expected an AlphaVantage API token in the context.");
+    let api_token = get_api_token(ctx).await;
     let ticker = args.single::<String>().unwrap();
     let endpoint = format!(
         "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={}&apikey={}",
@@ -263,10 +260,7 @@ struct Overview {
 #[command]
 #[aliases("d", "describe", "summary", "summarize")]
 async fn description(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-    let data_read = ctx.data.read().await;
-    let api_token = data_read
-        .get::<AlphaVantageAPIToken>()
-        .expect("Expected an AlphaVantage API token in the context.");
+    let api_token = get_api_token(ctx).await;
     let ticker = args.single::<String>().unwrap();
     let endpoint = format!(
         "https://www.alphavantage.co/query?function=OVERVIEW&symbol={}&apikey={}",
@@ -278,6 +272,7 @@ async fn description(ctx: &Context, msg: &Message, mut args: Args) -> CommandRes
 
     Ok(())
 }
+
 async fn get_api_token(ctx: &Context) -> String {
     let data_read = ctx.data.read().await;
     let api_token = data_read

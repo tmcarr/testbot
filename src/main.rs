@@ -50,16 +50,17 @@ impl EventHandler for Handler {
     advice,
     ball,
     botsnack,
+    company,
     description,
     drink,
-    ping,
-    quit,
-    github,
-    random,
     food,
+    github,
+    ping,
+    price,
+    quit,
+    random,
     stonkcomp,
     stonks,
-    price
 )]
 struct General;
 
