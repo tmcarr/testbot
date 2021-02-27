@@ -278,14 +278,19 @@ async fn description(ctx: &Context, msg: &Message, mut args: Args) -> CommandRes
 
     Ok(())
 }
-
-#[command]
-#[aliases("summary", "profile")]
-async fn company(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+async fn get_api_token(ctx: &Context) -> String {
     let data_read = ctx.data.read().await;
     let api_token = data_read
         .get::<AlphaVantageAPIToken>()
         .expect("Expected an AlphaVantage API token in the context.");
+
+    return api_token.clone();
+}
+
+#[command]
+#[aliases("summary", "profile")]
+async fn company(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    let api_token = get_api_token(ctx).await;
     let ticker = args.single::<String>().unwrap();
     let endpoint = format!(
         "https://www.alphavantage.co/query?function=OVERVIEW&symbol={}&apikey={}",
