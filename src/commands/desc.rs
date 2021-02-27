@@ -1,58 +1,58 @@
 // use crate::DbClient;
-use pickledb::{PickleDb, PickleDbDumpPolicy, SerializationMethod};
-use serenity::framework::standard::{macros::command, Args, CommandResult};
-use serenity::model::prelude::*;
-use serenity::prelude::*;
+// use pickledb::{PickleDb, PickleDbDumpPolicy, SerializationMethod};
+// use serenity::framework::standard::{macros::command, Args, CommandResult};
+// use serenity::model::prelude::*;
+// use serenity::prelude::*;
 
-// Command to write to DB
-#[command]
-async fn describe(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
-    // let data = ctx.data.read();
-    // let _pool = data
-    //     .get::<DbClient>()
-    //     .expect("Failed to get database pool from context");
+// // Command to write to DB
+// #[command]
+// async fn describe(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
+//     // let data = ctx.data.read();
+//     // let _pool = data
+//     //     .get::<DbClient>()
+//     //     .expect("Failed to get database pool from context");
 
-    let value = &args.message();
+//     let value = &args.message();
 
-    let mut db = PickleDb::load(
-        "testbot.db",
-        PickleDbDumpPolicy::AutoDump,
-        SerializationMethod::Json,
-    )
-    .unwrap();
+//     let mut db = PickleDb::load(
+//         "testbot.db",
+//         PickleDbDumpPolicy::AutoDump,
+//         SerializationMethod::Json,
+//     )
+//     .unwrap();
 
-    db.set(&String::from(&msg.author.name), value).unwrap();
-    let _ = msg
-        .channel_id
-        .say(
-            &ctx.http,
-            &format!("Set {}'s description to: '{}'", &msg.author.name, value),
-        )
-        .await;
-    Ok(())
-}
+//     db.set(&String::from(&msg.author.name), value).unwrap();
+//     let _ = msg
+//         .channel_id
+//         .say(
+//             &ctx.http,
+//             &format!("Set {}'s description to: '{}'", &msg.author.name, value),
+//         )
+//         .await;
+//     Ok(())
+// }
 
-// Command to read from DB
-#[command]
-async fn about(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-    let user = &args.single_quoted::<String>().unwrap();
+// // Command to read from DB
+// #[command]
+// async fn about(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+//     let user = &args.single_quoted::<String>().unwrap();
 
-    let db = PickleDb::load(
-        "testbot.db",
-        PickleDbDumpPolicy::DumpUponRequest,
-        SerializationMethod::Json,
-    )
-    .unwrap();
+//     let db = PickleDb::load(
+//         "testbot.db",
+//         PickleDbDumpPolicy::DumpUponRequest,
+//         SerializationMethod::Json,
+//     )
+//     .unwrap();
 
-    let description = db.get::<String>(user).unwrap();
+//     let description = db.get::<String>(user).unwrap();
 
-    let _ = msg
-        .channel_id
-        .say(
-            &ctx.http,
-            &format!("{} is decribed as: '{}'", user, description),
-        )
-        .await;
+//     let _ = msg
+//         .channel_id
+//         .say(
+//             &ctx.http,
+//             &format!("{} is decribed as: '{}'", user, description),
+//         )
+//         .await;
 
-    Ok(())
-}
+//     Ok(())
+// }

@@ -138,3 +138,121 @@ async fn price(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
     Ok(())
 }
+
+// Example output here: https://www.alphavantage.co/query?function=OVERVIEW&symbol=IBM&apikey=demo
+#[derive(Deserialize, Debug)]
+#[serde(rename_all = "lowercase")]
+struct Overview {
+    symbol: String,
+    assettype: String,
+    name: String,
+    description: String,
+    exchange: String,
+    currency: String,
+    country: String,
+    sector: String,
+    industry: String,
+    #[serde(skip)]
+    address: String,
+    #[serde(skip)]
+    fulltimeemployees: String,
+    fiscalyearend: String,
+    latestquarter: String,
+    marketcapitalization: String,
+    ebitda: String,
+    peratio: String,
+    pegratio: String,
+    bookvalue: String,
+    dividendpershare: String,
+    dividendyield: String,
+    eps: String,
+    revenuepersharettm: String,
+    profitmargin: String,
+    operatingmarginttm: String,
+    returnonassetsttm: String,
+    returnonequityttm: String,
+    revenuettm: String,
+    grossprofitttm: String,
+    dilutedepsttm: String,
+    quarterlyearningsgrowthyoy: String,
+    quarterlyrevenuegrowthyoy: String,
+    analysttargetprice: String,
+    trailingpe: String,
+    forwardpe: String,
+    pricetosalesratiottm: String,
+    pricetobookratio: String,
+    evtorevenue: String,
+    evtoebitda: String,
+    beta: String,
+    #[serde(rename(deserialize = "52WeekHigh"))]
+    fiftytwoweekhigh: String,
+    #[serde(rename(deserialize = "52WeekLow"))]
+    fiftytwoweeklow: String,
+    #[serde(rename(deserialize = "50DayMovingAverage"))]
+    fiftydaymovingaverage: String,
+    #[serde(rename(deserialize = "200DayMovingAverage"))]
+    twohundreddaymovingaverage: String,
+    sharesoutstanding: String,
+    sharesfloat: String,
+    sharesshort: String,
+    sharesshortpriormonth: String,
+    shortratio: String,
+    shortpercentoutstanding: String,
+    shortpercentfloat: String,
+    percentinsiders: String,
+    percentinstitutions: String,
+    forwardannualdividendrate: String,
+    forwardannualdividendyield: String,
+    payoutratio: String,
+    dividenddate: String,
+    exdividenddate: String,
+    lastsplitfactor: String,
+    lastsplitdate: String,
+}
+
+#[command]
+#[aliases("describe", "summary", "summarize")]
+async fn description(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    // Read our API token out of the ctx
+    let data_read = ctx.data.read().await;
+    let api_token = data_read
+        .get::<AlphaVantageAPIToken>()
+        .expect("Expected an AlphaVantage API token in the context.");
+
+    let ticker = args.single::<String>().unwrap();
+    let endpoint = format!(
+        "https://www.alphavantage.co/query?function=OVERVIEW&symbol={}&apikey={}",
+        ticker, api_token
+    );
+    let profile = reqwest::get(&endpoint).await?.json::<Overview>().await?;
+
+    let _ = msg.channel_id.say(&ctx.http, profile.description).await?;
+
+    Ok(())
+}
+
+#[command]
+#[aliases("summary", "profile")]
+async fn company(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    // Read our API token out of the ctx
+    let data_read = ctx.data.read().await;
+    let api_token = data_read
+        .get::<AlphaVantageAPIToken>()
+        .expect("Expected an AlphaVantage API token in the context.");
+
+    let ticker = args.single::<String>().unwrap();
+    let endpoint = format!(
+        "https://www.alphavantage.co/query?function=OVERVIEW&symbol={}&apikey={}",
+        ticker, api_token
+    );
+    let profile = reqwest::get(&endpoint).await?.json::<Overview>().await?;
+
+    let message = MessageBuilder::new()
+        .quote_rest()
+        .push_bold_line(profile.symbol)
+        .build();
+
+    let _ = msg.channel_id.say(&ctx.http, message).await?;
+
+    Ok(())
+}

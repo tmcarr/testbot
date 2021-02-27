@@ -15,9 +15,9 @@ use serenity::{
 use std::{collections::HashSet, env, sync::Arc};
 use tracing::{info, instrument};
 
-// Re import advice::*,  when its ready
+// Re import desc::*,  when its ready
 use commands::{
-    advice::*, ball::*, botsnack::*, desc::*, drink::*, food::*, github::*, meta::*, owner::*,
+    advice::*, ball::*, botsnack::*, drink::*, food::*, github::*, meta::*, owner::*,
     random::*, stonks::*,
 };
 
@@ -47,7 +47,7 @@ impl EventHandler for Handler {
 // Remember to re-add advice here when its ready.
 #[group]
 #[commands(
-    advice, ball, botsnack, describe, drink, about, ping, quit, github, random, food, stonkcomp,
+    advice, ball, botsnack, description, drink, ping, quit, github, random, food, stonkcomp,
     stonks, price
 )]
 struct General;
