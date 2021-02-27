@@ -1,12 +1,16 @@
-use serde::Deserialize;
+use serde::de;
+use serde::{self, Deserialize, Deserializer};
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
+use serenity::utils::MessageBuilder;
+use std::fmt::Display;
+use std::str::FromStr;
 
 use crate::AlphaVantageAPIToken;
 
 #[command]
-#[aliases("stocks", "stock", "stonks", "stonk")]
+#[aliases("stocks", "stock", "stonks", "stonk", "viz")]
 async fn stonks(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     for stonk in args.iter::<String>() {
         let _ = msg
@@ -23,45 +27,49 @@ async fn stonks(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     Ok(())
 }
 
-// Example Response
-//
-// {
-//     "Global Quote": {
-//         "01. symbol": "IBM",
-//         "02. open": "123.3700",
-//         "03. high": "124.3500",
-//         "04. low": "122.3350",
-//         "05. price": "122.4700",
-//         "06. volume": "5672671",
-//         "07. latest trading day": "2021-02-25",
-//         "08. previous close": "123.2100",
-//         "09. change": "-0.7400",
-//         "10. change percent": "-0.6006%"
-//     }
-// }
+// Example Response at https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=IBM&apikey=demo
 
-#[derive(Deserialize)]
+fn from_str<'de, T, D>(deserializer: D) -> Result<T, D::Error>
+where
+    T: FromStr,
+    T::Err: Display,
+    D: Deserializer<'de>,
+{
+    let s = String::deserialize(deserializer)?;
+    T::from_str(&s).map_err(de::Error::custom)
+}
+
+#[derive(Deserialize, Debug)]
 struct Quote {
-    // #[serde(rename="01. symbol")]
-    // symbol: String,
-    // #[serde(rename="02. open")]
-    // open: i32,
-    // #[serde(rename="03. high")]
-    // hight: i32,
-    // #[serde(rename="04. low")]
-    // low: i32,
+    #[serde(rename = "01. symbol")]
+    symbol: String,
+    #[serde(deserialize_with = "from_str")]
+    #[serde(rename = "02. open")]
+    open: f32,
+    #[serde(deserialize_with = "from_str")]
+    #[serde(rename = "03. high")]
+    high: f32,
+    #[serde(deserialize_with = "from_str")]
+    #[serde(rename = "04. low")]
+    low: f32,
+    #[serde(deserialize_with = "from_str")]
     #[serde(rename = "05. price")]
-    price: String,
-    // #[serde(rename="06. volume")]
-    // volume: u64,
-    // #[serde(rename="07. latest trading day")]
-    // latest_day: String,
-    // #[serde(rename="08. previous close")]
-    // prev_close: i32,
-    // #[serde(rename="09. change")]
-    // change: i32,
-    // #[serde(rename="10. change percent")]
-    // change_pct: i32
+    price: f32,
+    #[serde(deserialize_with = "from_str")]
+    #[serde(rename = "06. volume")]
+    volume: u64,
+    // TODO: Handle datestrings to render better...
+    #[serde(rename = "07. latest trading day")]
+    latest_day: String,
+    #[serde(deserialize_with = "from_str")]
+    #[serde(rename = "08. previous close")]
+    prev_close: f32,
+    #[serde(deserialize_with = "from_str")]
+    #[serde(rename = "09. change")]
+    change: f32,
+    // TODO: Handle the % within this field....
+    #[serde(rename = "10. change percent")]
+    change_pct: String,
 }
 
 #[derive(Deserialize)]
@@ -85,12 +93,31 @@ async fn price(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         ticker, api_token
     );
     let globalquote = reqwest::get(&endpoint).await?.json::<GlobalQuote>().await?;
-    let price = match globalquote.quote.price.parse::<f32>() {
-        Ok(price) => format!("Last Price: {}", price),
-        Err(e) => format!("Failed to get stock price: {}", e),
-    };
 
-    let _ = msg.channel_id.say(&ctx.http, price).await?;
+    let message = MessageBuilder::new()
+        .quote_rest()
+        .push_bold_line(globalquote.quote.symbol)
+        .push_mono_line(format!("{:<15}{:<20}", "Open:", globalquote.quote.open))
+        .push_mono_line(format!("{:<15}{:<20}", "High:", globalquote.quote.high))
+        .push_mono_line(format!("{:<15}{:<20}", "Low:", globalquote.quote.low))
+        .push_mono_line(format!("{:<15}{:<20}", "Price:", globalquote.quote.price))
+        .push_mono_line(format!("{:<15}{:<20}", "Volume:", globalquote.quote.volume))
+        .push_mono_line(format!(
+            "{:<15}{:<20}",
+            "Prev. Close:", globalquote.quote.prev_close
+        ))
+        .push_mono_line(format!("{:<15}{:<20}", "Change:", globalquote.quote.change))
+        .push_mono_line(format!(
+            "{:<15}{:<20}",
+            "Change %:", globalquote.quote.change_pct
+        ))
+        .push_mono_line(format!(
+            "{:<15}{:<20}",
+            "Latest Day:", globalquote.quote.latest_day
+        ))
+        .build();
+
+    let _ = msg.channel_id.say(&ctx.http, message).await?;
 
     Ok(())
 }
