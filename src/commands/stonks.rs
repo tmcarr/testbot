@@ -10,7 +10,7 @@ use std::str::FromStr;
 use crate::AlphaVantageAPIToken;
 
 #[command]
-#[aliases("stocks", "stock", "stonks", "stonk", "viz")]
+#[aliases("stocks", "stock", "stonks", "stonk")]
 async fn stonks(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     for stonk in args.iter::<String>() {
         let _ = msg
@@ -21,6 +21,21 @@ async fn stonks(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
                     "https://www.finviz.com/chart.ashx?t={}&ty=c&ta=1&p=d&s=l",
                     &stonk.unwrap()
                 ),
+            )
+            .await;
+    }
+    Ok(())
+}
+
+#[command]
+#[aliases("stockcomp", "stonkcomp", "s&pcomp")]
+async fn stonkcomp(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    for stonk in args.iter::<String>() {
+        let _ = msg
+            .channel_id
+            .say(
+                &ctx.http,
+                &format!("https://stonks.egd.pw/spcomp?symbol={}", &stonk.unwrap()),
             )
             .await;
     }
