@@ -96,12 +96,10 @@ struct GlobalQuote {
 #[command]
 #[aliases("sprice", "stonkprice", "stockprice")]
 async fn price(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-    // Read our API token out of the ctx
     let data_read = ctx.data.read().await;
     let api_token = data_read
         .get::<AlphaVantageAPIToken>()
         .expect("Expected an AlphaVantage API token in the context.");
-
     let ticker = args.single::<String>().unwrap();
     let endpoint = format!(
         "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={}&apikey={}",
@@ -141,48 +139,84 @@ async fn price(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 
 // Example output here: https://www.alphavantage.co/query?function=OVERVIEW&symbol=IBM&apikey=demo
 #[derive(Deserialize, Debug)]
-#[serde(rename_all = "lowercase")]
 struct Overview {
+    #[serde(rename(deserialize = "Symbol"))]
     symbol: String,
+    #[serde(rename(deserialize = "AssetType"))]
     assettype: String,
+    #[serde(rename(deserialize = "Name"))]
     name: String,
+    #[serde(rename(deserialize = "Description"))]
     description: String,
+    #[serde(rename(deserialize = "Exchange"))]
     exchange: String,
+    #[serde(rename(deserialize = "Currency"))]
     currency: String,
+    #[serde(rename(deserialize = "Country"))]
     country: String,
+    #[serde(rename(deserialize = "Sector"))]
     sector: String,
+    #[serde(rename(deserialize = "Industry"))]
     industry: String,
-    #[serde(skip)]
+    #[serde(rename(deserialize = "Address"))]
     address: String,
-    #[serde(skip)]
+    #[serde(rename(deserialize = "FullTimeEmployees"))]
     fulltimeemployees: String,
+    #[serde(rename(deserialize = "FiscalYearEnd"))]
     fiscalyearend: String,
+    #[serde(rename(deserialize = "LatestQuarter"))]
     latestquarter: String,
+    #[serde(rename(deserialize = "MarketCapitalization"))]
     marketcapitalization: String,
+    #[serde(rename(deserialize = "EBITDA"))]
     ebitda: String,
+    #[serde(rename(deserialize = "PERatio"))]
     peratio: String,
+    #[serde(rename(deserialize = "PEGRatio"))]
     pegratio: String,
+    #[serde(rename(deserialize = "BookValue"))]
     bookvalue: String,
+    #[serde(rename(deserialize = "DividendPerShare"))]
     dividendpershare: String,
+    #[serde(rename(deserialize = "DividendYield"))]
     dividendyield: String,
+    #[serde(rename(deserialize = "EPS"))]
     eps: String,
+    #[serde(rename(deserialize = "RevenuePerShareTTM"))]
     revenuepersharettm: String,
+    #[serde(rename(deserialize = "ProfitMargin"))]
     profitmargin: String,
+    #[serde(rename(deserialize = "OperatingMarginTTM"))]
     operatingmarginttm: String,
+    #[serde(rename(deserialize = "ReturnOnAssetsTTM"))]
     returnonassetsttm: String,
+    #[serde(rename(deserialize = "ReturnOnEquityTTM"))]
     returnonequityttm: String,
+    #[serde(rename(deserialize = "RevenueTTM"))]
     revenuettm: String,
+    #[serde(rename(deserialize = "GrossProfitTTM"))]
     grossprofitttm: String,
+    #[serde(rename(deserialize = "DilutedEPSTTM"))]
     dilutedepsttm: String,
+    #[serde(rename(deserialize = "QuarterlyEarningsGrowthYOY"))]
     quarterlyearningsgrowthyoy: String,
+    #[serde(rename(deserialize = "QuarterlyRevenueGrowthYOY"))]
     quarterlyrevenuegrowthyoy: String,
+    #[serde(rename(deserialize = "AnalystTargetPrice"))]
     analysttargetprice: String,
+    #[serde(rename(deserialize = "TrailingPE"))]
     trailingpe: String,
+    #[serde(rename(deserialize = "ForwardPE"))]
     forwardpe: String,
+    #[serde(rename(deserialize = "PriceToSalesRatioTTM"))]
     pricetosalesratiottm: String,
+    #[serde(rename(deserialize = "PriceToBookRatio"))]
     pricetobookratio: String,
+    #[serde(rename(deserialize = "EVToRevenue"))]
     evtorevenue: String,
+    #[serde(rename(deserialize = "EVToEBITDA"))]
     evtoebitda: String,
+    #[serde(rename(deserialize = "Beta"))]
     beta: String,
     #[serde(rename(deserialize = "52WeekHigh"))]
     fiftytwoweekhigh: String,
@@ -192,33 +226,47 @@ struct Overview {
     fiftydaymovingaverage: String,
     #[serde(rename(deserialize = "200DayMovingAverage"))]
     twohundreddaymovingaverage: String,
+    #[serde(rename(deserialize = "SharesOutstanding"))]
     sharesoutstanding: String,
+    #[serde(rename(deserialize = "SharesFloat"))]
     sharesfloat: String,
+    #[serde(rename(deserialize = "SharesShort"))]
     sharesshort: String,
+    #[serde(rename(deserialize = "SharesShortPriorMonth"))]
     sharesshortpriormonth: String,
+    #[serde(rename(deserialize = "ShortRatio"))]
     shortratio: String,
+    #[serde(rename(deserialize = "ShortPercentOutstanding"))]
     shortpercentoutstanding: String,
+    #[serde(rename(deserialize = "ShortPercentFloat"))]
     shortpercentfloat: String,
+    #[serde(rename(deserialize = "PercentInsiders"))]
     percentinsiders: String,
+    #[serde(rename(deserialize = "PercentInstitutions"))]
     percentinstitutions: String,
+    #[serde(rename(deserialize = "ForwardAnnualDividendRate"))]
     forwardannualdividendrate: String,
+    #[serde(rename(deserialize = "ForwardAnnualDividendYield"))]
     forwardannualdividendyield: String,
+    #[serde(rename(deserialize = "PayoutRatio"))]
     payoutratio: String,
+    #[serde(rename(deserialize = "DividendDate"))]
     dividenddate: String,
+    #[serde(rename(deserialize = "ExDividendDate"))]
     exdividenddate: String,
+    #[serde(rename(deserialize = "LastSplitFactor"))]
     lastsplitfactor: String,
+    #[serde(rename(deserialize = "LastSplitDate"))]
     lastsplitdate: String,
 }
 
 #[command]
-#[aliases("describe", "summary", "summarize")]
+#[aliases("d", "describe", "summary", "summarize")]
 async fn description(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-    // Read our API token out of the ctx
     let data_read = ctx.data.read().await;
     let api_token = data_read
         .get::<AlphaVantageAPIToken>()
         .expect("Expected an AlphaVantage API token in the context.");
-
     let ticker = args.single::<String>().unwrap();
     let endpoint = format!(
         "https://www.alphavantage.co/query?function=OVERVIEW&symbol={}&apikey={}",
@@ -234,12 +282,10 @@ async fn description(ctx: &Context, msg: &Message, mut args: Args) -> CommandRes
 #[command]
 #[aliases("summary", "profile")]
 async fn company(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-    // Read our API token out of the ctx
     let data_read = ctx.data.read().await;
     let api_token = data_read
         .get::<AlphaVantageAPIToken>()
         .expect("Expected an AlphaVantage API token in the context.");
-
     let ticker = args.single::<String>().unwrap();
     let endpoint = format!(
         "https://www.alphavantage.co/query?function=OVERVIEW&symbol={}&apikey={}",
