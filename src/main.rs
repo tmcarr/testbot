@@ -60,7 +60,7 @@ impl EventHandler for Handler {
     quit,
     random,
     stonkcomp,
-    stonks,
+    stonks
 )]
 struct General;
 
