@@ -114,22 +114,22 @@ async fn price(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let message = MessageBuilder::new()
         .quote_rest()
         .push_bold_line(globalquote.quote.symbol)
-        .push_mono_line(format!("{:<15}{:<20}", "Price:", globalquote.quote.price))
-        .push_mono_line(format!("{:<15}{:<20}", "Open:", globalquote.quote.open))
-        .push_mono_line(format!("{:<15}{:<20}", "High:", globalquote.quote.high))
-        .push_mono_line(format!("{:<15}{:<20}", "Low:", globalquote.quote.low))
-        .push_mono_line(format!("{:<15}{:<20}", "Change:", globalquote.quote.change))
+        .push_mono_line(format!("{:<15}{:<10\}", "Price:", globalquote.quote.price))
+        .push_mono_line(format!("{:<15}{:<10\}", "Open:", globalquote.quote.open))
+        .push_mono_line(format!("{:<15}{:<10\}", "High:", globalquote.quote.high))
+        .push_mono_line(format!("{:<15}{:<10\}", "Low:", globalquote.quote.low))
+        .push_mono_line(format!("{:<15}{:<10\}", "Change:", globalquote.quote.change))
         .push_mono_line(format!(
-            "{:<15}{:<20}",
+            "{:<15}{:<10\}",
             "% Change:", globalquote.quote.change_pct
         ))
         .push_mono_line(format!(
-            "{:<15}{:<20}",
+            "{:<15}{:<10\}",
             "Prev. Close:", globalquote.quote.prev_close
         ))
-        .push_mono_line(format!("{:<15}{:<20}", "Volume:", globalquote.quote.volume))
+        .push_mono_line(format!("{:<15}{:<10\}", "Volume:", globalquote.quote.volume))
         .push_mono_line(format!(
-            "{:<15}{:<20}",
+            "{:<15}{:<10\}",
             "Latest Day:", globalquote.quote.latest_day
         ))
         .build();
