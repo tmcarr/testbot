@@ -5,6 +5,8 @@ use serenity::prelude::*;
 
 #[command]
 #[aliases("rand")]
+#[description = "Choose a ranfrom item from the list of inputs"]
+#[usage = "foo bar baz"]
 async fn random(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let choices = args.raw().collect::<Vec<&str>>();
 

@@ -4,6 +4,8 @@ use serenity::prelude::*;
 
 #[command]
 #[aliases("source")]
+#[description = "Reply with a link to the bot's source code"]
+#[usage = ""]
 async fn github(ctx: &Context, msg: &Message) -> CommandResult {
     let github = "https://github.com/tmcarr/testbot";
     let _ = msg

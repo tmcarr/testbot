@@ -11,6 +11,8 @@ use crate::AlphaVantageAPIToken;
 
 #[command]
 #[aliases("stocks", "stock", "stonks", "stonk")]
+#[description = "Display the Finviz graph for a given ticker."]
+#[usage = "TWTR"]
 async fn stonks(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     for stonk in args.iter::<String>() {
         let _ = msg
@@ -28,7 +30,9 @@ async fn stonks(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 }
 
 #[command]
-#[aliases("stockcomp", "stonkcomp", "s&pcomp")]
+#[aliases("stockcomp", "s&pcomp")]
+#[description = "Display a graphic showing performance information about a ticker compared to the S&P500"]
+#[usage = "~stonkcomp TWTR"]
 async fn stonkcomp(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     for stonk in args.iter::<String>() {
         let _ = msg
@@ -94,7 +98,9 @@ struct GlobalQuote {
 }
 
 #[command]
-#[aliases("sprice", "stonkprice", "stockprice")]
+#[aliases("p")]
+#[description = "Find price information about a ticker"]
+#[usage = "TWTR"]
 async fn price(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let api_token = get_api_token(ctx).await;
     let ticker = args.single::<String>().unwrap();
@@ -258,7 +264,9 @@ struct Overview {
 }
 
 #[command]
-#[aliases("d", "describe", "summary", "summarize")]
+#[aliases("d", "describe")]
+#[description = "Find a summary of a company from its ticker."]
+#[usage = "TWTR"]
 async fn description(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let api_token = get_api_token(ctx).await;
     let ticker = args.single::<String>().unwrap();
@@ -280,25 +288,4 @@ async fn get_api_token(ctx: &Context) -> String {
         .expect("Expected an AlphaVantage API token in the context.");
 
     return api_token.clone();
-}
-
-#[command]
-#[aliases("summary", "profile")]
-async fn company(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-    let api_token = get_api_token(ctx).await;
-    let ticker = args.single::<String>().unwrap();
-    let endpoint = format!(
-        "https://www.alphavantage.co/query?function=OVERVIEW&symbol={}&apikey={}",
-        ticker, api_token
-    );
-    let profile = reqwest::get(&endpoint).await?.json::<Overview>().await?;
-
-    let message = MessageBuilder::new()
-        .quote_rest()
-        .push_bold_line(profile.symbol)
-        .build();
-
-    let _ = msg.channel_id.say(&ctx.http, message).await?;
-
-    Ok(())
 }

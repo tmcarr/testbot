@@ -5,11 +5,19 @@ use log::error;
 use serenity::{
     async_trait,
     client::bridge::gateway::ShardManager,
-    framework::standard::macros::{group, hook},
-    framework::standard::{CommandError, DispatchError},
-    framework::StandardFramework,
+    client::{Client, Context, EventHandler},
+    framework::standard::macros::{group, help, hook},
+    framework::standard::{
+        help_commands, Args, CommandError, CommandGroup,
+        CommandResult, DispatchError, HelpOptions, StandardFramework,
+    },
     http::Http,
-    model::{channel::Message, event::ResumedEvent, gateway::Ready},
+    model::{
+        channel::Message,
+        event::ResumedEvent,
+        gateway::Ready,
+        prelude::UserId,
+    },
     prelude::*,
 };
 use std::{collections::HashSet, env, sync::Arc};
@@ -50,7 +58,6 @@ impl EventHandler for Handler {
     advice,
     ball,
     botsnack,
-    company,
     description,
     drink,
     food,
@@ -123,6 +130,19 @@ async fn main() {
         }
     }
 
+    #[help]
+    async fn my_help(
+        context: &Context,
+        msg: &Message,
+        args: Args,
+        help_options: &'static HelpOptions,
+        groups: &[&'static CommandGroup],
+        owners: HashSet<UserId>,
+    ) -> CommandResult {
+        let _ = help_commands::with_embeds(context, msg, args, help_options, groups, owners).await;
+        Ok(())
+    }
+
     // This will load the environment variables located at `./.env`, relative to
     // the CWD.
     kankyo::init().ok();
@@ -163,7 +183,8 @@ async fn main() {
         .after(after_hook)
         .unrecognised_command(unrecognized_command_hook)
         .on_dispatch_error(dispatch_error_hook)
-        .group(&GENERAL_GROUP);
+        .group(&GENERAL_GROUP)
+        .help(&MY_HELP);
 
     let mut client = Client::builder(&token)
         .framework(framework)

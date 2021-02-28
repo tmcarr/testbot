@@ -5,6 +5,8 @@ use serenity::prelude::*;
 
 #[command]
 #[aliases("8ball")]
+#[description = "Shakes the digital 8-ball."]
+#[usage = ""]
 async fn ball(ctx: &Context, msg: &Message) -> CommandResult {
     let responses = vec![
         "As I see it, yes.",
