@@ -8,16 +8,11 @@ use serenity::{
     client::{Client, Context, EventHandler},
     framework::standard::macros::{group, help, hook},
     framework::standard::{
-        help_commands, Args, CommandError, CommandGroup,
-        CommandResult, DispatchError, HelpOptions, StandardFramework,
+        help_commands, Args, CommandError, CommandGroup, CommandResult, DispatchError, HelpOptions,
+        StandardFramework,
     },
     http::Http,
-    model::{
-        channel::Message,
-        event::ResumedEvent,
-        gateway::Ready,
-        prelude::UserId,
-    },
+    model::{channel::Message, event::ResumedEvent, gateway::Ready, prelude::UserId},
     prelude::*,
 };
 use std::{collections::HashSet, env, sync::Arc};
