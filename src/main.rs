@@ -5,20 +5,23 @@ use log::error;
 use serenity::{
     async_trait,
     client::bridge::gateway::ShardManager,
-    framework::standard::macros::{group, hook},
-    framework::standard::{CommandError, DispatchError},
-    framework::StandardFramework,
+    client::{Client, Context, EventHandler},
+    framework::standard::macros::{group, help, hook},
+    framework::standard::{
+        help_commands, Args, CommandError, CommandGroup, CommandResult, DispatchError, HelpOptions,
+        StandardFramework,
+    },
     http::Http,
-    model::{channel::Message, event::ResumedEvent, gateway::Ready},
+    model::{channel::Message, event::ResumedEvent, gateway::Ready, prelude::UserId},
     prelude::*,
 };
 use std::{collections::HashSet, env, sync::Arc};
 use tracing::{info, instrument};
 
-// Re import advice::*,  when its ready
+// Re import desc::*,  when its ready
 use commands::{
-    advice::*, ball::*, botsnack::*, desc::*, drink::*, food::*, github::*, meta::*, owner::*,
-    random::*, stonks::*,
+    advice::*, ball::*, botsnack::*, drink::*, food::*, github::*, meta::*, owner::*, random::*,
+    stonks::*,
 };
 
 struct ShardManagerContainer;
@@ -47,8 +50,19 @@ impl EventHandler for Handler {
 // Remember to re-add advice here when its ready.
 #[group]
 #[commands(
-    advice, ball, botsnack, describe, drink, about, ping, quit, github, random, food, stonkcomp,
-    stonks, price
+    advice,
+    ball,
+    botsnack,
+    description,
+    drink,
+    food,
+    github,
+    ping,
+    price,
+    quit,
+    random,
+    stonkcomp,
+    stonks
 )]
 struct General;
 
@@ -111,6 +125,19 @@ async fn main() {
         }
     }
 
+    #[help]
+    async fn my_help(
+        context: &Context,
+        msg: &Message,
+        args: Args,
+        help_options: &'static HelpOptions,
+        groups: &[&'static CommandGroup],
+        owners: HashSet<UserId>,
+    ) -> CommandResult {
+        let _ = help_commands::with_embeds(context, msg, args, help_options, groups, owners).await;
+        Ok(())
+    }
+
     // This will load the environment variables located at `./.env`, relative to
     // the CWD.
     kankyo::init().ok();
@@ -151,7 +178,8 @@ async fn main() {
         .after(after_hook)
         .unrecognised_command(unrecognized_command_hook)
         .on_dispatch_error(dispatch_error_hook)
-        .group(&GENERAL_GROUP);
+        .group(&GENERAL_GROUP)
+        .help(&MY_HELP);
 
     let mut client = Client::builder(&token)
         .framework(framework)

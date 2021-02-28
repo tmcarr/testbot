@@ -6,6 +6,8 @@ use serenity::prelude::*;
 #[command]
 #[owners_only]
 #[aliases("killkillkill", "abortabortabort")]
+#[description = "Causes the bot to die."]
+#[usage = ""]
 async fn quit(ctx: &Context, msg: &Message) -> CommandResult {
     let data = ctx.data.read().await;
 

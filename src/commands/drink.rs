@@ -5,6 +5,8 @@ use serenity::prelude::*;
 
 #[command]
 #[aliases("drink", "drinks", "drank")]
+#[description = "Reply with a suggestion of fine beverage."]
+#[usage = ""]
 async fn drink(ctx: &Context, msg: &Message) -> CommandResult {
     let responses = vec![
         "Water.",

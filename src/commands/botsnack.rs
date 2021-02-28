@@ -4,6 +4,8 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 
 #[command]
+#[description = "A bot's gotta eat...."]
+#[usage = ""]
 async fn botsnack(ctx: &Context, msg: &Message) -> CommandResult {
     let responses = vec!["Yum!", "*cronch*", "MOAR", "*Smiles*", "Nice."];
     let response = responses.choose(&mut rand::thread_rng()).unwrap();

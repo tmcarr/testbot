@@ -15,6 +15,8 @@ struct Advice {
 }
 
 #[command]
+#[description = "Asks for the advice of the gods and reveals their musings."]
+#[usage = ""]
 async fn advice(ctx: &Context, msg: &Message) -> CommandResult {
     const ENDPOINT: &str = "https://api.adviceslip.com/advice";
     let advice = reqwest::get(ENDPOINT).await?.json::<Advice>().await?;
