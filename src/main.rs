@@ -57,9 +57,10 @@ impl EventHandler for Handler {
 // Remember to re-add advice here when its ready.
 #[group]
 #[commands(
-    advice, ball, botsnack, describe, drink, food, github, ping, price, quit, random, stonkcomp,
+    advice, ball, botsnack, describe, drink, food, github, initdb, ping, price, quit, random, stonkcomp,
     stonks
 )]
+
 struct General;
 
 #[tokio::main]
