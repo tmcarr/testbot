@@ -7,7 +7,7 @@ use serenity::utils::MessageBuilder;
 use std::fmt::Display;
 use std::str::FromStr;
 
-use crate::AlphaVantageAPIToken;
+use crate::AlphaVantageApiToken;
 
 #[command]
 #[aliases("stocks", "stock", "stonks", "stonk")]
@@ -284,7 +284,7 @@ async fn description(ctx: &Context, msg: &Message, mut args: Args) -> CommandRes
 async fn get_api_token(ctx: &Context) -> String {
     let data_read = ctx.data.read().await;
     let api_token = data_read
-        .get::<AlphaVantageAPIToken>()
+        .get::<AlphaVantageApiToken>()
         .expect("Expected an AlphaVantage API token in the context.");
 
     return api_token.clone();

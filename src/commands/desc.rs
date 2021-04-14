@@ -4,6 +4,7 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 
 #[command]
+#[aliases("set")]
 async fn describe(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let data = ctx.data.read().await;
     let key = args.single::<String>().unwrap();
@@ -30,6 +31,7 @@ async fn describe(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
 }
 
 // #[command]
+// #[aliases("whatis", "show")]
 // async fn define(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
 //     let data = ctx.data.read().await;
 //     let key = args.single::<String>().unwrap();
