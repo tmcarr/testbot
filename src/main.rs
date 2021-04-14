@@ -24,6 +24,8 @@ use commands::{
     stonks::*,
 };
 
+use dhb_postgres_heroku::{get_client, Client as HerokuPostgresClient};
+
 struct ShardManagerContainer;
 impl TypeMapKey for ShardManagerContainer {
     type Value = Arc<Mutex<ShardManager>>;
@@ -32,6 +34,11 @@ impl TypeMapKey for ShardManagerContainer {
 struct AlphaVantageAPIToken;
 impl TypeMapKey for AlphaVantageAPIToken {
     type Value = String;
+}
+
+struct HerokuPostgresConnectionPool;
+impl TypeMapKey for HerokuPostgresConnectionPool {
+    type Value = HerokuPostgresClient;
 }
 
 struct Handler;
@@ -139,7 +146,7 @@ async fn main() {
     }
 
     // This will load the environment variables located at `./.env`, relative to
-    // the CWD.
+    // the CWD. Primarially used for local testing.
     kankyo::init().ok();
 
     // Initialize the logger to use environment variables.
@@ -151,7 +158,11 @@ async fn main() {
     let token = env::var("DISCORD_TOKEN").expect("Failed to load DISCORD_TOKEN from environment.");
     let alphavantage_token =
         env::var("ALPHAVANTAGE").expect("Failed to retrieve alphavantage API token.");
+    let database_url = env::var("DATABASE_URL").expect("Unable to read Database URL.");
     let http = Http::new_with_token(&token);
+
+    // Create DB client
+    let db_client = get_client(&database_url);
 
     // We will fetch your bot's owners and id
     let (owners, _bot_id) = match http.get_current_application_info().await {
@@ -190,9 +201,9 @@ async fn main() {
     {
         let mut data = client.data.write().await;
         data.insert::<ShardManagerContainer>(client.shard_manager.clone());
-        data.insert::<AlphaVantageAPIToken>(alphavantage_token)
+        data.insert::<AlphaVantageAPIToken>(alphavantage_token);
+        data.insert::<HerokuPostgresConnectionPool>(db_client);
     };
-
     if let Err(why) = client.start().await {
         error!("Client error: {:?}", why);
     };

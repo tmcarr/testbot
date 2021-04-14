@@ -8,13 +8,13 @@ readme = "README.md"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-# dhb-postgres-heroku = "0.1.0-alpha.4"
+dhb-postgres-heroku = "0.1.0-alpha.4"
 env_logger = "0.8.3"
 kankyo = "0.3.0"
 log = "0.4.14"
 pickledb = "0.4.1"
-# postgres = "0.17.4"
-# r2d2_postgres = "0.16.0"
+postgres = "0.19.1"
+r2d2_postgres = "0.18.0"
 rand = "0.8.3"
 reqwest = { version = "0.11.1", features = ["blocking", "json"] }
 serde = { version = "1.0.115", features = ["derive"] }
