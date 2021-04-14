@@ -36,8 +36,8 @@ impl TypeMapKey for AlphaVantageAPIToken {
     type Value = String;
 }
 
-struct HerokuPostgresConnectionPool;
-impl TypeMapKey for HerokuPostgresConnectionPool {
+struct PostgresClient;
+impl TypeMapKey for PostgresClient {
     type Value = HerokuPostgresClient;
 }
 
@@ -202,7 +202,7 @@ async fn main() {
         let mut data = client.data.write().await;
         data.insert::<ShardManagerContainer>(client.shard_manager.clone());
         data.insert::<AlphaVantageAPIToken>(alphavantage_token);
-        data.insert::<HerokuPostgresClient>(db_client);
+        data.insert::<PostgresClient>(db_client);
     };
     if let Err(why) = client.start().await {
         error!("Client error: {:?}", why);
