@@ -20,7 +20,7 @@ use tracing::{info, instrument};
 
 // Re import desc::*,  when its ready
 use commands::{
-    advice::*, ball::*, botsnack::*, drink::*, food::*, github::*, meta::*, owner::*, random::*,
+    advice::*, ball::*, botsnack::*, desc::*, drink::*, food::*, github::*, meta::*, owner::*, random::*,
     stonks::*,
 };
 
@@ -60,7 +60,7 @@ impl EventHandler for Handler {
     advice,
     ball,
     botsnack,
-    description,
+    describe,
     drink,
     food,
     github,
