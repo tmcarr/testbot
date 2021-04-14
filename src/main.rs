@@ -1,7 +1,12 @@
 mod commands;
+mod schema;
+mod models;
 
 #[macro_use]
 extern crate diesel_migrations;
+
+#[macro_use]
+extern crate diesel;
 
 use diesel::r2d2::ManageConnection;
 use log::error;
