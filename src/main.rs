@@ -202,7 +202,7 @@ async fn main() {
         let mut data = client.data.write().await;
         data.insert::<ShardManagerContainer>(client.shard_manager.clone());
         data.insert::<AlphaVantageAPIToken>(alphavantage_token);
-        data.insert::<HerokuPostgresConnectionPool>(db_client);
+        data.insert::<HerokuPostgresClient>(db_client);
     };
     if let Err(why) = client.start().await {
         error!("Client error: {:?}", why);

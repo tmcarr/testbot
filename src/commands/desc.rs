@@ -5,11 +5,19 @@ use serenity::prelude::*;
 #[command]
 async fn describe(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     // let data = ctx.data.read();
-    // let _pool = data
-    //     .get::<DbClient>()
-    //     .expect("Failed to get database pool from context");
 
     let value = &args.message();
+
+    if let Some(client) = data.get::<HerokuPostgresClient>() {
+        msg.reply(ctx, "Shutting down!").await?;
+        manager.lock().await.shutdown_all().await;
+    } else {
+        msg.reply(ctx, "There was a problem getting the shard manager")
+            .await?;
+
+        return Ok(());
+    }
+
 
     // Set in DB
     let _ = msg
