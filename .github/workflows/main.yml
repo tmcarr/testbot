@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
-        
+
       - uses: actions/cache@v2
         with:
           path: |
@@ -37,7 +37,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: fmt
-          args: --all -- --check
+          args: --all -- --checks
 
       - name: Run cargo test
         uses: actions-rs/cargo@v1
