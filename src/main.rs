@@ -31,8 +31,8 @@ impl TypeMapKey for ShardManagerContainer {
     type Value = Arc<Mutex<ShardManager>>;
 }
 
-struct AlphaVantageAPIToken;
-impl TypeMapKey for AlphaVantageAPIToken {
+struct AlphaVantageApiToken;
+impl TypeMapKey for AlphaVantageApiToken {
     type Value = String;
 }
 
@@ -201,7 +201,7 @@ async fn main() {
     {
         let mut data = client.data.write().await;
         data.insert::<ShardManagerContainer>(client.shard_manager.clone());
-        data.insert::<AlphaVantageAPIToken>(alphavantage_token);
+        data.insert::<AlphaVantageApiToken>(alphavantage_token);
         data.insert::<PostgresClient>(db_client);
     };
     if let Err(why) = client.start().await {
