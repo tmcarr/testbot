@@ -1,6 +1,9 @@
 mod commands;
 
-// use dhb_postgres_heroku::{get_pool, HerokuPool};
+#[macro_use]
+extern crate diesel_migrations;
+
+use diesel::r2d2::ManageConnection;
 use log::error;
 use serenity::{
     async_trait,
@@ -24,8 +27,6 @@ use commands::{
     random::*, stonks::*,
 };
 
-use dhb_postgres_heroku::{get_client, Client as HerokuPostgresClient};
-
 struct ShardManagerContainer;
 impl TypeMapKey for ShardManagerContainer {
     type Value = Arc<Mutex<ShardManager>>;
@@ -38,7 +39,7 @@ impl TypeMapKey for AlphaVantageApiToken {
 
 struct PostgresClient;
 impl TypeMapKey for PostgresClient {
-    type Value = HerokuPostgresClient;
+    type Value = diesel::r2d2::ConnectionManager<diesel::pg::PgConnection>;
 }
 
 struct Handler;
@@ -62,6 +63,8 @@ impl EventHandler for Handler {
 )]
 
 struct General;
+
+embed_migrations!("migrations");
 
 #[tokio::main]
 #[instrument]
@@ -152,7 +155,13 @@ async fn main() {
     let http = Http::new_with_token(&token);
 
     // Create DB client
-    let db_client = get_client(&database_url);
+    let connection_manager = diesel::r2d2::ConnectionManager::new(database_url);
+
+    let db_client = connection_manager
+        .connect()
+        .expect("Could not connect to Postgres");
+
+    embedded_migrations::run(&db_client).expect("Could not run migrations");
 
     // We will fetch your bot's owners and id
     let (owners, _bot_id) = match http.get_current_application_info().await {
@@ -192,7 +201,7 @@ async fn main() {
         let mut data = client.data.write().await;
         data.insert::<ShardManagerContainer>(client.shard_manager.clone());
         data.insert::<AlphaVantageApiToken>(alphavantage_token);
-        data.insert::<PostgresClient>(db_client);
+        data.insert::<PostgresClient>(connection_manager);
     };
     if let Err(why) = client.start().await {
         error!("Client error: {:?}", why);
