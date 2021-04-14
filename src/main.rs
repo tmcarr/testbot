@@ -20,8 +20,8 @@ use tracing::{info, instrument};
 
 // Re import desc::*,  when its ready
 use commands::{
-    advice::*, ball::*, botsnack::*, desc::*, drink::*, food::*, github::*, meta::*, owner::*, random::*,
-    stonks::*,
+    advice::*, ball::*, botsnack::*, desc::*, drink::*, food::*, github::*, meta::*, owner::*,
+    random::*, stonks::*,
 };
 
 use dhb_postgres_heroku::{get_client, Client as HerokuPostgresClient};
@@ -57,18 +57,7 @@ impl EventHandler for Handler {
 // Remember to re-add advice here when its ready.
 #[group]
 #[commands(
-    advice,
-    ball,
-    botsnack,
-    describe,
-    drink,
-    food,
-    github,
-    ping,
-    price,
-    quit,
-    random,
-    stonkcomp,
+    advice, ball, botsnack, describe, drink, food, github, ping, price, quit, random, stonkcomp,
     stonks
 )]
 struct General;
