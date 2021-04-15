@@ -9,7 +9,6 @@ extern crate diesel_migrations;
 extern crate diesel;
 
 use diesel::r2d2::ManageConnection;
-use log::error;
 use serenity::{
     async_trait,
     client::bridge::gateway::ShardManager,
@@ -24,7 +23,11 @@ use serenity::{
     prelude::*,
 };
 use std::{collections::HashSet, env, sync::Arc};
-use tracing::{info, instrument};
+use tracing::{error, info, instrument};
+use tracing_subscriber::{
+    FmtSubscriber,
+    EnvFilter,
+};
 
 // Re import desc::*,  when its ready
 use commands::{
@@ -145,13 +148,17 @@ async fn main() {
 
     // This will load the environment variables located at `./.env`, relative to
     // the CWD. Primarially used for local testing.
-    kankyo::init().ok();
+    dotenv::dotenv().expect("Failed to load .env file");
 
     // Initialize the logger to use environment variables.
     //
     // In this case, a good default is setting the environment variable
     // `RUST_LOG` to debug`.
-    env_logger::init();
+    let subscriber = FmtSubscriber::builder()
+        .with_env_filter(EnvFilter::from_default_env())
+        .finish();
+
+    tracing::subscriber::set_global_default(subscriber).expect("Failed to start the logger");
 
     let token = env::var("DISCORD_TOKEN").expect("Failed to load DISCORD_TOKEN from environment.");
     let alphavantage_token =

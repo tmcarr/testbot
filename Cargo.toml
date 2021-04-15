@@ -9,16 +9,15 @@ readme = "README.md"
 
 [dependencies]
 env_logger = "0.8.3"
-kankyo = "0.3.0"
 log = "0.4.14"
-pickledb = "0.4.1"
 rand = "0.8.3"
 reqwest = { version = "0.11.1", features = ["blocking", "json"] }
 serde = { version = "1.0.115", features = ["derive"] }
 serde_json = "1.0.56"
 tokio = { version = "1.2.0", features = ["macros", "rt-multi-thread", "time"] }
 tracing = "0.1.25"
-
+dotenv = "0.15"
+tracing-subscriber = "0.2"
 
 
 [dependencies.serenity]
