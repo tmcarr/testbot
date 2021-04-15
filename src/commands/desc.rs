@@ -1,5 +1,7 @@
+use crate::diesel::prelude::*;
+use crate::diesel::QueryDsl;
 use crate::diesel::RunQueryDsl;
-use crate::models::Description;
+use crate::models::*;
 use crate::schema::descriptions::dsl::*;
 use crate::PostgresClient;
 use diesel::r2d2::ManageConnection;
@@ -12,10 +14,10 @@ use serenity::prelude::*;
 async fn describe(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let data = ctx.data.read().await;
     let input_key = args.single::<String>().unwrap();
-    let input_value = args.single::<String>().unwrap();
+    let input_value = args.parse::<String>().unwrap();
 
     if let Some(dbclient) = data.get::<PostgresClient>() {
-        let db_connection = dbclient.connect().expect("Could not connect to Postgres");
+        let connection = dbclient.connect().expect("Could not connect to Postgres");
         let _ = msg
             .channel_id
             .say(
@@ -24,14 +26,17 @@ async fn describe(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
             )
             .await;
 
-        let description = Description {
+        let description = NewDescription {
             key: &input_key,
             value: &input_value,
         };
         // Do DB Write here
         diesel::insert_into(descriptions)
             .values(&description)
-            .execute(&db_connection)
+            .on_conflict(key)
+            .do_update()
+            .set(&description)
+            .execute(&connection)
             .unwrap();
     } else {
         msg.reply(
@@ -48,32 +53,39 @@ async fn describe(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
     Ok(())
 }
 
-// #[command]
-// #[aliases("whatis", "show")]
-// async fn define(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-//     let data = ctx.data.read().await;
-//     let key = args.single::<String>().unwrap();
+#[command]
+#[aliases("show")]
+async fn define(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+    let data = ctx.data.read().await;
+    let input_key = args.single::<String>().unwrap();
 
-//     if let Some(dbclient) = data.get::<PostgresClient>() {
-//         // Read from DB
-//         let _ = msg
-//             .channel_id
-//             .say(
-//                 &ctx.http,
-//                 &format!("INCOMPELTE. LIES: {} is decribed as: '{}'", key, value),
-//             )
-//             .await;
-//     } else {
-//         msg.reply(
-//             ctx,
-//             &format!(
-//                 "There was a problem getting the databse client. Failed to define {} as '{}'",
-//                 &key, &value
-//             ),
-//         )
-//         .await?;
+    if let Some(dbclient) = data.get::<PostgresClient>() {
+        let connection = dbclient.connect().expect("Could not connect to Postgres");
 
-//         return Ok(());
-//     }
-//     Ok(())
-// }
+        // Do DB Read here
+        let value_data = descriptions
+            .filter(key.eq(&input_key))
+            .execute(&connection)
+            .expect("Error loading results.");
+
+        let _ = msg
+            .channel_id
+            .say(
+                &ctx.http,
+                &format!("{} is decribed as: '{}'", input_key, &value_data),
+            )
+            .await;
+    } else {
+        msg.reply(
+            ctx,
+            &format!(
+                "There was a problem looking up the value for {}",
+                &input_key
+            ),
+        )
+        .await?;
+
+        return Ok(());
+    }
+    Ok(())
+}
