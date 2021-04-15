@@ -52,7 +52,7 @@ async fn describe(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
 }
 
 #[command]
-#[aliases("show")]
+#[aliases("show", "get")]
 async fn define(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let data = ctx.data.read().await;
     let input_key = args.single::<String>().unwrap();
