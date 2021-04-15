@@ -8,7 +8,7 @@ use serenity::prelude::*;
 #[aliases("killkillkill", "abortabortabort")]
 #[description = "Causes the bot to die."]
 #[usage = ""]
-async fn quitbot(ctx: &Context, msg: &Message) -> CommandResult {
+async fn quit(ctx: &Context, msg: &Message) -> CommandResult {
     let data = ctx.data.read().await;
 
     if let Some(manager) = data.get::<ShardManagerContainer>() {
