@@ -70,7 +70,7 @@ async fn define(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             .channel_id
             .say(
                 &ctx.http,
-                &format!("{} is decribed as: '{:#?}'", input_key, &value_data[0].value),
+                &format!("{} is decribed as: '{}'", input_key, &value_data[0].value),
             )
             .await;
     } else {
