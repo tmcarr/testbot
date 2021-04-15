@@ -4,7 +4,7 @@ use serenity::model::prelude::*;
 use serenity::prelude::*;
 
 #[command]
-#[aliases("cuisine", "food", "dinner", "lunch", "breakfast", "snack")]
+#[aliases("cuisine", "dinner", "lunch", "breakfast", "snack")]
 #[description = "Reply with a suggestion for cuisine."]
 #[usage = ""]
 async fn food(ctx: &Context, msg: &Message) -> CommandResult {

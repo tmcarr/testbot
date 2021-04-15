@@ -1,8 +1,14 @@
 use super::schema::descriptions;
 
-#[derive(Insertable)]
+#[derive(Queryable, AsChangeset)]
+pub struct Description {
+    pub key: String,
+    pub value: String,
+}
+
+#[derive(Insertable, AsChangeset)]
 #[table_name = "descriptions"]
-pub struct Description<'a> {
+pub struct NewDescription<'a> {
     pub key: &'a str,
     pub value: &'a str,
 }
