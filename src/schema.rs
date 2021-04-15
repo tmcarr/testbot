@@ -1,4 +1,3 @@
-
 table! {
     descriptions (key) {
         key -> Text,

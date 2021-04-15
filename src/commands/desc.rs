@@ -1,11 +1,11 @@
+use crate::diesel::RunQueryDsl;
+use crate::models::Description;
+use crate::schema::descriptions::dsl::*;
 use crate::PostgresClient;
 use diesel::r2d2::ManageConnection;
 use serenity::framework::standard::{macros::command, Args, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
-use crate::schema::descriptions::dsl::*;
-use crate::models::Description;
-use crate::diesel::RunQueryDsl;
 
 #[command]
 #[aliases("set")]
@@ -18,12 +18,15 @@ async fn describe(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
         let db_connection = dbclient.connect().expect("Could not connect to Postgres");
         let _ = msg
             .channel_id
-            .say(&ctx.http, &format!("Defining {} as: '{}'", &input_key, &input_value))
+            .say(
+                &ctx.http,
+                &format!("Defining {} as: '{}'", &input_key, &input_value),
+            )
             .await;
 
         let description = Description {
-          key: &input_key,
-          value: &input_value,
+            key: &input_key,
+            value: &input_value,
         };
         // Do DB Write here
         diesel::insert_into(descriptions)

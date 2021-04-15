@@ -1,6 +1,6 @@
 mod commands;
-mod schema;
 mod models;
+mod schema;
 
 #[macro_use]
 extern crate diesel_migrations;
@@ -24,10 +24,7 @@ use serenity::{
 };
 use std::{collections::HashSet, env, sync::Arc};
 use tracing::{error, info, instrument};
-use tracing_subscriber::{
-    FmtSubscriber,
-    EnvFilter,
-};
+use tracing_subscriber::{EnvFilter, FmtSubscriber};
 
 // Re import desc::*,  when its ready
 use commands::{
