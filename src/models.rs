@@ -1,9 +1,9 @@
 use super::schema::descriptions;
 
 #[derive(Queryable, AsChangeset)]
-pub struct Description<'a> {
-    pub key: &'a str,
-    pub value: &'a str,
+pub struct Description {
+    pub key: String,
+    pub value: String,
 }
 
 #[derive(Insertable, AsChangeset)]

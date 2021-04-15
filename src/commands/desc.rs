@@ -14,7 +14,7 @@ use serenity::prelude::*;
 async fn describe(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let data = ctx.data.read().await;
     let input_key = args.single::<String>().unwrap();
-    let input_value = args.parse::<String>().unwrap();
+    let input_value = args.remains().unwrap();
 
     if let Some(dbclient) = data.get::<PostgresClient>() {
         let connection = dbclient.connect().expect("Could not connect to Postgres");
@@ -30,14 +30,12 @@ async fn describe(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
             key: &input_key,
             value: &input_value,
         };
-        // Do DB Write here
         diesel::insert_into(descriptions)
             .values(&description)
             .on_conflict(key)
             .do_update()
             .set(&description)
-            .execute(&connection)
-            .unwrap();
+            .execute(&connection)?;
     } else {
         msg.reply(
             ctx,
@@ -65,14 +63,14 @@ async fn define(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         // Do DB Read here
         let value_data = descriptions
             .filter(key.eq(&input_key))
-            .execute(&connection)
+            .load::<Description>(&connection)
             .expect("Error loading results.");
 
         let _ = msg
             .channel_id
             .say(
                 &ctx.http,
-                &format!("{} is decribed as: '{}'", input_key, &value_data),
+                &format!("{} is decribed as: '{:#?}'", input_key, &value_data[0].value),
             )
             .await;
     } else {
