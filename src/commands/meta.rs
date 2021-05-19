@@ -17,7 +17,7 @@ async fn ping(ctx: &Context, msg: &Message) -> CommandResult {
 async fn fart(ctx: &Context, msg: &Message) -> CommandResult {
     let _ = msg
         .channel_id
-        .say(&ctx.http, "Thbbbbbbbbbbbbbbt.... queak.")
+        .say(&ctx.http, "Thbbbbbbbbbbbbbbt.... squeak.")
         .await;
 
     Ok(())
