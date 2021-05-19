@@ -10,3 +10,15 @@ async fn ping(ctx: &Context, msg: &Message) -> CommandResult {
 
     Ok(())
 }
+
+#[command]
+#[description = "Let er' rip!"]
+#[usage = ""]
+async fn fart(ctx: &Context, msg: &Message) -> CommandResult {
+    let _ = msg
+        .channel_id
+        .say(&ctx.http, "Thbbbbbbbbbbbbbbt.... queak.")
+        .await;
+
+    Ok(())
+}

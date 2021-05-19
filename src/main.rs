@@ -62,7 +62,7 @@ impl EventHandler for Handler {
 
 #[group]
 #[commands(
-    advice, ball, botsnack, define, describe, drink, food, github, ping, price, quit, random,
+    advice, ball, botsnack, define, describe, drink, fart, food, github, ping, price, quit, random,
     stonkcomp, stonks
 )]
 
