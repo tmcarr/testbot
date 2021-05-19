@@ -11,7 +11,7 @@ env:
 
 jobs:
   checks:
-    name: Checks
+    name: Initial Cargo Check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
@@ -38,7 +38,7 @@ jobs:
         with:
           command: check
   fmt:
-    name: Fmt
+    name: Cargo Fmt
     runs-on: ubuntu-latest
     needs: [checks]
     steps:
@@ -68,7 +68,7 @@ jobs:
           args: --all --
 
   tests:
-    name: Tests
+    name: Cargo Test
     runs-on: ubuntu-latest
     needs: [checks]
     steps:
@@ -97,7 +97,7 @@ jobs:
           command: test
 
   clippy:
-    name: Clippy
+    name: Cargo Clippy
     runs-on: ubuntu-latest
     needs: [checks]
     steps:
@@ -127,7 +127,7 @@ jobs:
           args: -- -D warnings
 
   audit:
-    name: Audit
+    name: Github Audit
     runs-on: ubuntu-latest
     needs: [checks]
     steps:
