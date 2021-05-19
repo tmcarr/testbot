@@ -287,5 +287,5 @@ async fn get_api_token(ctx: &Context) -> String {
         .get::<AlphaVantageApiToken>()
         .expect("Expected an AlphaVantage API token in the context.");
 
-    return api_token.clone();
+    api_token.clone();
 }
