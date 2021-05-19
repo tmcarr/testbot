@@ -23,7 +23,7 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: $testbot-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Install nightly toolchain
         uses: actions-rs/toolchain@v1
@@ -51,7 +51,7 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: $testbot-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Install nightly toolchain
         uses: actions-rs/toolchain@v1
@@ -81,7 +81,7 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: $testbot-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Install nightly toolchain
         uses: actions-rs/toolchain@v1
@@ -110,7 +110,7 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: $testbot-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Install nightly toolchain
         uses: actions-rs/toolchain@v1
@@ -140,7 +140,7 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: $testbot-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Install nightly toolchain
         uses: actions-rs/toolchain@v1
