@@ -11,7 +11,7 @@ env:
 
 jobs:
   checks:
-    name: Initial Cargo Check
+    name: Checks
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
@@ -23,35 +23,7 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: $testbot-cargo-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Install nightly toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: nightly
-          override: true
-          components: rustfmt, clippy
-
-      - name: Run cargo check
-        uses: actions-rs/cargo@v1
-        with:
-          command: check
-  fmt:
-    name: Cargo Fmt
-    runs-on: ubuntu-latest
-    needs: [checks]
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v2
-
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: $testbot-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Install nightly toolchain
         uses: actions-rs/toolchain@v1
@@ -67,88 +39,21 @@ jobs:
           command: fmt
           args: --all --
 
-  tests:
-    name: Cargo Test
-    runs-on: ubuntu-latest
-    needs: [checks]
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v2
-
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: $testbot-cargo-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Install nightly toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: nightly
-          override: true
-          components: rustfmt, clippy
-
       - name: Run cargo test
         uses: actions-rs/cargo@v1
         with:
           command: test
 
-  clippy:
-    name: Cargo Clippy
-    runs-on: ubuntu-latest
-    needs: [checks]
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v2
-
-      - uses: actions/cache@v2
+      - name: Run cargo check
+        uses: actions-rs/cargo@v1
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: $testbot-cargo-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Install nightly toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: nightly
-          override: true
-          components: rustfmt, clippy
+          command: check
 
       - name: Run cargo clippy
         uses: actions-rs/cargo@v1
         with:
           command: clippy
           args: -- -D warnings
-
-  audit:
-    name: Github Audit
-    runs-on: ubuntu-latest
-    needs: [checks]
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v2
-
-      - uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: $testbot-cargo-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Install nightly toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          profile: minimal
-          toolchain: nightly
-          override: true
-          components: rustfmt, clippy
 
       - name: Run Audit
         uses: actions-rs/audit-check@v1
@@ -157,7 +62,7 @@ jobs:
 
   notify:
     runs-on: ubuntu-latest
-    needs: [fmt, tests, checks, clippy, audit]
+    needs: [checks]
     steps:
       - name: fancier-discord-webhooks
         uses: Slimefun/discord-webhook@1.4
