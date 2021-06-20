@@ -28,7 +28,7 @@ async fn describe(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
 
         let description = NewDescription {
             key: &input_key,
-            value: &input_value,
+            value: input_value,
         };
         diesel::insert_into(descriptions)
             .values(&description)
