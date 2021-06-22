@@ -28,7 +28,7 @@ use tracing_subscriber::{EnvFilter, FmtSubscriber};
 
 // Re import desc::*,  when its ready
 use commands::{
-    advice::*, ball::*, botsnack::*, desc::*, drink::*, food::*, github::*, meta::*, owner::*,
+    advice::*, ball::*, botsnack::*, desc::*, drink::*, food::*, github::*, pingpong::*, owner::*,
     random::*, stonks::*,
 };
 
