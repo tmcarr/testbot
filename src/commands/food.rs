@@ -11,7 +11,7 @@ async fn food(ctx: &Context, msg: &Message) -> CommandResult {
     let responses = vec![
         "Asian",
         "Barbecue",
-        "Hamburgers",
+        "Burgers",
         "Italian",
         "Mexican",
         "Pho",
