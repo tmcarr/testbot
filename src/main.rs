@@ -9,6 +9,7 @@ extern crate diesel_migrations;
 extern crate diesel;
 
 use diesel::r2d2::ManageConnection;
+use futures::future::BoxFuture;
 use serenity::{
     async_trait,
     client::bridge::gateway::ShardManager,
@@ -22,14 +23,18 @@ use serenity::{
     model::{channel::Message, event::ResumedEvent, gateway::Ready, prelude::UserId},
     prelude::*,
 };
-use std::{collections::HashSet, env, sync::Arc};
+use std::{
+    collections::{HashMap, HashSet},
+    env,
+    sync::Arc,
+};
 use tracing::{error, info, instrument};
 use tracing_subscriber::{EnvFilter, FmtSubscriber};
 
 // Re import desc::*,  when its ready
 use commands::{
-    advice::*, ball::*, botsnack::*, desc::*, drink::*, food::*, github::*, owner::*, pingpong::*,
-    random::*, stonks::*,
+    advice::*, ball::*, desc::*, drink::*, food::*, github::*, owner::*, pingpong::*, random::*,
+    stonks::*,
 };
 
 struct ShardManagerContainer;
@@ -47,7 +52,14 @@ impl TypeMapKey for PostgresClient {
     type Value = diesel::r2d2::ConnectionManager<diesel::pg::PgConnection>;
 }
 
-struct Handler;
+struct SlashCommand {
+    description: &'static str,
+    handler: fn() -> BoxFuture<'static, Option<String>>,
+}
+
+struct Handler {
+    slash_commands: HashMap<&'static str, SlashCommand>,
+}
 
 #[async_trait]
 impl EventHandler for Handler {
@@ -64,7 +76,6 @@ impl EventHandler for Handler {
 #[commands(
     advice,
     ball,
-    botsnack,
     define,
     describe,
     description,
@@ -196,6 +207,13 @@ async fn main() {
         Err(why) => panic!("Could not access application info: {:?}", why),
     };
 
+    let slash_commands = maplit::hashmap! {
+        "botsnack" => SlashCommand {
+            description:  "A bot's gotta eat....",
+            handler: commands::botsnack::botsnack,
+        }
+    };
+
     // Create the framework
     let framework = StandardFramework::new()
         .configure(|c| {
@@ -215,7 +233,7 @@ async fn main() {
 
     let mut client = Client::builder(&token)
         .framework(framework)
-        .event_handler(Handler)
+        .event_handler(Handler { slash_commands })
         .await
         .expect("Err creating client");
 
