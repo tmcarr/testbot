@@ -20,7 +20,10 @@ use serenity::{
         StandardFramework,
     },
     http::Http,
-    model::{channel::Message, event::ResumedEvent, gateway::Ready, prelude::UserId},
+    model::{
+        channel::Message, event::ResumedEvent, gateway::Ready, interactions::Interaction,
+        prelude::UserId,
+    },
     prelude::*,
 };
 use std::{
@@ -28,7 +31,7 @@ use std::{
     env,
     sync::Arc,
 };
-use tracing::{error, info, instrument};
+use tracing::{debug, error, info, instrument};
 use tracing_subscriber::{EnvFilter, FmtSubscriber};
 
 // Re import desc::*,  when its ready
@@ -80,6 +83,40 @@ impl EventHandler for Handler {
                     Err(e) => error!("Could not register {}: {:?}", name, e),
                     Ok(res) => info!("Registered {}: {:?}", name, res),
                 }
+            }
+        }
+    }
+
+    async fn interaction_create(
+        &self,
+        ctx: Context,
+        interaction: serenity::model::interactions::Interaction,
+    ) {
+        debug!("Handling interaction: {:?}", interaction);
+
+        let application_command = match interaction {
+            Interaction::ApplicationCommand(ref ac) => ac,
+            _ => return,
+        };
+
+        let command = match self
+            .slash_commands
+            .get(application_command.data.name.as_str())
+        {
+            Some(c) => c,
+            None => return,
+        };
+
+        let response = (command.handler)().await;
+
+        if let Some(text) = response {
+            let api_response = application_command.create_interaction_response(ctx.http, |r| {
+                r.kind(serenity::model::interactions::InteractionResponseType::ChannelMessageWithSource)
+                .interaction_response_data(|message| message.content(text))
+            }).await;
+
+            if let Err(e) = api_response {
+                error!("Error sending bot response: {:?}", e);
             }
         }
     }
