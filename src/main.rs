@@ -63,8 +63,25 @@ struct Handler {
 
 #[async_trait]
 impl EventHandler for Handler {
-    async fn ready(&self, _: Context, ready: Ready) {
+    async fn ready(&self, ctx: Context, ready: Ready) {
         info!("Connected as {}", ready.user.name);
+
+        for guild in ready.guilds {
+            for (&name, command) in self.slash_commands.iter() {
+                let result = guild
+                    .id()
+                    .create_application_command(&ctx.http, |cmd| {
+                        cmd.name(name.to_owned());
+                        cmd.description(command.description.to_owned())
+                    })
+                    .await;
+
+                match result {
+                    Err(e) => error!("Could not register {}: {:?}", name, e),
+                    Ok(res) => info!("Registered {}: {:?}", name, res),
+                }
+            }
+        }
     }
 
     async fn resume(&self, _: Context, _: ResumedEvent) {
@@ -182,10 +199,14 @@ async fn main() {
     tracing::subscriber::set_global_default(subscriber).expect("Failed to start the logger");
 
     let token = env::var("DISCORD_TOKEN").expect("Failed to load DISCORD_TOKEN from environment.");
+    let application_id = env::var("DISCORD_APPLICATION_ID")
+        .expect("Failed to load DISCORD_APPLICATION_ID from environment.")
+        .parse()
+        .expect("Application ID must be an integer");
     let alphavantage_token =
         env::var("ALPHAVANTAGE").expect("Failed to retrieve alphavantage API token.");
     let database_url = env::var("DATABASE_URL").expect("Unable to read Database URL.");
-    let http = Http::new_with_token(&token);
+    let http = Http::new_with_token_application_id(&token, application_id);
 
     // Create DB client
     let connection_manager = diesel::r2d2::ConnectionManager::new(database_url);
@@ -232,6 +253,7 @@ async fn main() {
         .help(&MY_HELP);
 
     let mut client = Client::builder(&token)
+        .application_id(application_id)
         .framework(framework)
         .event_handler(Handler { slash_commands })
         .await
