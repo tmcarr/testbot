@@ -28,7 +28,7 @@ use tracing_subscriber::{EnvFilter, FmtSubscriber};
 
 // Re import desc::*,  when its ready
 use commands::{
-    advice::*, ball::*, botsnack::*, desc::*, drink::*, food::*, github::*, pingpong::*, owner::*,
+    advice::*, ball::*, botsnack::*, desc::*, drink::*, food::*, github::*, owner::*, pingpong::*,
     random::*, stonks::*,
 };
 
@@ -62,8 +62,22 @@ impl EventHandler for Handler {
 
 #[group]
 #[commands(
-    advice, ball, botsnack, define, describe, description, drink, fart, food, github, ping, price, quit, random,
-    stonkcomp, stonks
+    advice,
+    ball,
+    botsnack,
+    define,
+    describe,
+    description,
+    drink,
+    fart,
+    food,
+    github,
+    ping,
+    price,
+    quit,
+    random,
+    stonkcomp,
+    stonks
 )]
 
 struct General;

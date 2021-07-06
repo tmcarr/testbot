@@ -9,17 +9,8 @@ use serenity::prelude::*;
 #[usage = ""]
 async fn food(ctx: &Context, msg: &Message) -> CommandResult {
     let responses = vec![
-        "Asian",
-        "Barbecue",
-        "Burgers",
-        "Italian",
-        "Mexican",
-        "Pho",
-        "Pizza",
-        "Steak",
-        "Seafood",
-        "Indian",
-        "Cajun",
+        "Asian", "Barbecue", "Burgers", "Italian", "Mexican", "Pho", "Pizza", "Steak", "Seafood",
+        "Indian", "Cajun",
     ];
 
     let item = responses.choose(&mut rand::thread_rng()).unwrap();

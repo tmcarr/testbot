@@ -5,7 +5,7 @@ pub mod desc;
 pub mod drink;
 pub mod food;
 pub mod github;
-pub mod pingpong;
 pub mod owner;
+pub mod pingpong;
 pub mod random;
 pub mod stonks;
