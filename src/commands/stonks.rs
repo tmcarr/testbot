@@ -264,7 +264,7 @@ struct Overview {
 }
 
 #[command]
-#[aliases("d", "describe")]
+#[aliases("d", "company")]
 #[description = "Find a summary of a company from its ticker."]
 #[usage = "TWTR"]
 async fn description(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
