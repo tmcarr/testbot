@@ -1,6 +1,7 @@
 pub mod advice;
 pub mod ball;
 pub mod botsnack;
+pub mod dadjoke;
 pub mod desc;
 pub mod drink;
 pub mod food;

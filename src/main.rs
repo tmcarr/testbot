@@ -28,8 +28,8 @@ use tracing_subscriber::{EnvFilter, FmtSubscriber};
 
 // Re import desc::*,  when its ready
 use commands::{
-    advice::*, ball::*, botsnack::*, desc::*, drink::*, food::*, github::*, owner::*, pingpong::*,
-    random::*, stonks::*,
+    advice::*, ball::*, botsnack::*, dadjoke::*, desc::*, drink::*, food::*, github::*, owner::*,
+    pingpong::*, random::*, stonks::*,
 };
 
 struct ShardManagerContainer;
@@ -65,6 +65,7 @@ impl EventHandler for Handler {
     advice,
     ball,
     botsnack,
+    dadjoke,
     define,
     describe,
     description,
