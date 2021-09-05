@@ -1,24 +1,30 @@
-use serenity::framework::standard::{macros::command, CommandResult};
-use serenity::model::prelude::*;
-use serenity::prelude::*;
+use crate::{async_trait, SlashCommand, SlashCommandHandler};
 
-#[command]
-#[description = "Reploy with 'Pong!'"]
-#[usage = ""]
-async fn ping(ctx: &Context, msg: &Message) -> CommandResult {
-    let _ = msg.channel_id.say(&ctx.http, "Pong!").await;
+use serenity::client::Context;
+use serenity::framework::standard::CommandResult;
+use serenity::model::interactions::application_command::ApplicationCommandInteractionData;
 
-    Ok(())
+struct StaticReplyHandler(&'static str);
+
+#[async_trait]
+impl SlashCommandHandler for StaticReplyHandler {
+    async fn handle(
+        &self,
+        _: &Context,
+        _: &ApplicationCommandInteractionData,
+    ) -> CommandResult<String> {
+        Ok(self.0.to_string())
+    }
 }
 
-#[command]
-#[description = "Let er' rip!"]
-#[usage = ""]
-async fn fart(ctx: &Context, msg: &Message) -> CommandResult {
-    let _ = msg
-        .channel_id
-        .say(&ctx.http, "Thbbbbbbbbbbbbbbt.... squeak.")
-        .await;
+pub(crate) static FART_COMMAND: SlashCommand = SlashCommand {
+    description: "Let er' rip!",
+    handler: &StaticReplyHandler("Thbbbbbbbbbbbbbbt.... squeak."),
+    options: vec![],
+};
 
-    Ok(())
-}
+pub(crate) static PING_COMMAND: SlashCommand = SlashCommand {
+    description: "Reploy with 'Pong!'",
+    handler: &StaticReplyHandler("Pong!"),
+    options: vec![],
+};

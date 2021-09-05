@@ -1,13 +1,11 @@
-use rand::seq::SliceRandom;
-use serenity::framework::standard::{macros::command, CommandResult};
-use serenity::model::prelude::*;
-use serenity::prelude::*;
+use crate::{SlashCommand, SlashCommandOption};
 
-#[command]
-#[aliases("8ball")]
-#[description = "Shakes the digital 8-ball."]
-#[usage = ""]
-async fn ball(ctx: &Context, msg: &Message) -> CommandResult {
+use rand::seq::SliceRandom;
+use serenity::client::Context;
+use serenity::framework::standard::CommandResult;
+use serenity::model::interactions::application_command::ApplicationCommandInteractionData;
+
+async fn ball(_: &Context, _: &ApplicationCommandInteractionData) -> CommandResult<String> {
     let responses = vec![
         "As I see it, yes.",
         "Ask again later.",
@@ -33,7 +31,21 @@ async fn ball(ctx: &Context, msg: &Message) -> CommandResult {
 
     let choice = responses.choose(&mut rand::thread_rng()).unwrap();
 
-    let _ = msg.channel_id.say(&ctx.http, choice).await;
+    Ok(choice.to_string())
+}
 
-    Ok(())
+make_slash_command_handler!(BallHandler, ball);
+
+lazy_static::lazy_static! {
+    pub(crate) static ref BALL_COMMAND: SlashCommand = SlashCommand {
+        description: "Shakes the digital 8-ball.",
+        handler: &BallHandler,
+        options: vec![
+            SlashCommandOption {
+                name: "question".to_string(),
+                required: true,
+                description: "What would you like to ask the magic 8-ball?".to_string(),
+            },
+        ]
+    };
 }

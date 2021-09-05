@@ -1,3 +1,23 @@
+// The make_slash_command_handler macro will be available to all of the child modules, thanks to the
+// historical "textual scope" that applies to macros.  #[macro_export] makes scoping rules more
+// normal, but forcefully makes the macro pub and that is even worse.
+macro_rules! make_slash_command_handler {
+    ($struct_name:ident, $function:ident) => {
+        struct $struct_name;
+
+        #[crate::async_trait]
+        impl crate::SlashCommandHandler for $struct_name {
+            async fn handle(
+                &self,
+                ctx: &$crate::Context,
+                data: &$crate::ApplicationCommandInteractionData,
+            ) -> CommandResult<String> {
+                $function(ctx, data).await
+            }
+        }
+    };
+}
+
 pub mod advice;
 pub mod ball;
 pub mod botsnack;

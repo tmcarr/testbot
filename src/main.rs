@@ -9,7 +9,6 @@ extern crate diesel_migrations;
 extern crate diesel;
 
 use diesel::r2d2::ManageConnection;
-use futures::future::BoxFuture;
 use serenity::{
     async_trait,
     client::bridge::gateway::ShardManager,
@@ -37,10 +36,7 @@ use std::{
 use tracing::{debug, error, info, instrument};
 use tracing_subscriber::{EnvFilter, FmtSubscriber};
 
-// Re import desc::*,  when its ready
-use commands::{
-    advice::*, ball::*, desc::*, drink::*, food::*, github::*, owner::*, pingpong::*, stonks::*,
-};
+use commands::owner::*;
 
 struct ShardManagerContainer;
 impl TypeMapKey for ShardManagerContainer {
@@ -63,14 +59,23 @@ struct SlashCommandOption {
     description: String,
 }
 
+#[async_trait]
+trait SlashCommandHandler {
+    async fn handle(
+        &self,
+        ctx: &Context,
+        data: &ApplicationCommandInteractionData,
+    ) -> CommandResult<String>;
+}
+
 struct SlashCommand {
     description: &'static str,
-    handler: fn(&ApplicationCommandInteractionData) -> BoxFuture<'static, Option<String>>,
+    handler: &'static (dyn SlashCommandHandler + Send + Sync),
     options: Vec<SlashCommandOption>,
 }
 
 struct Handler {
-    slash_commands: HashMap<&'static str, SlashCommand>,
+    slash_commands: HashMap<&'static str, &'static SlashCommand>,
 }
 
 #[async_trait]
@@ -131,9 +136,12 @@ impl EventHandler for Handler {
             None => return,
         };
 
-        let response = (command.handler)(&application_command.data).await;
+        let response = command
+            .handler
+            .handle(&ctx, &application_command.data)
+            .await;
 
-        if let Some(text) = response {
+        if let Ok(text) = response {
             let api_response = application_command.create_interaction_response(ctx.http, |r| {
                 r.kind(serenity::model::interactions::InteractionResponseType::ChannelMessageWithSource)
                 .interaction_response_data(|message| message.content(text))
@@ -151,9 +159,7 @@ impl EventHandler for Handler {
 }
 
 #[group]
-#[commands(
-    advice, ball, define, describe, drink, fart, food, github, ping, price, quit, stonkcomp, stonks
-)]
+#[commands(quit)]
 
 struct General;
 
@@ -275,25 +281,18 @@ async fn main() {
         Err(why) => panic!("Could not access application info: {:?}", why),
     };
 
-    let random_command = SlashCommand {
-        description: "Choose a random item from the list of inputs",
-        options: (1..=25)
-            .map(|i| SlashCommandOption {
-                name: format!("choice{}", i),
-                required: false,
-                description: format!("Choice {}", i),
-            })
-            .collect(),
-        handler: commands::random::handler,
-    };
-
     let slash_commands = maplit::hashmap! {
-        "botsnack" => SlashCommand {
-            description:  "A bot's gotta eat....",
-            handler: commands::botsnack::botsnack,
-            options: vec![],
-        },
-        "random" => random_command,
+        "8ball" => &*commands::ball::BALL_COMMAND,
+        "advice" => &commands::advice::ADVICE_COMMAND,
+        "botsnack" => &commands::botsnack::BOTSNACK_COMMAND,
+        "cuisine" => &commands::food::FOOD_COMMAND,
+        "define" => &*commands::desc::DEFINE_COMMAND,
+        "describe" => &*commands::desc::DESCRIBE_COMMAND,
+        "drink" => &commands::drink::DRINK_COMMAND,
+        "fart" => &commands::pingpong::FART_COMMAND,
+        "ping" => &commands::pingpong::PING_COMMAND,
+        "random" => &*commands::random::RANDOM_COMMAND,
+        "source" => &commands::github::GITHUB_COMMAND,
     };
 
     // Create the framework

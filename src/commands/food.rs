@@ -1,13 +1,12 @@
-use rand::seq::SliceRandom;
-use serenity::framework::standard::{macros::command, CommandResult};
-use serenity::model::prelude::*;
-use serenity::prelude::*;
+use crate::SlashCommand;
 
-#[command]
-#[aliases("cuisine", "dinner", "lunch", "breakfast", "snack")]
-#[description = "Reply with a suggestion for cuisine."]
-#[usage = ""]
-async fn food(ctx: &Context, msg: &Message) -> CommandResult {
+use rand::seq::SliceRandom;
+use serenity::client::Context;
+use serenity::framework::standard::CommandResult;
+use serenity::model::interactions::application_command::ApplicationCommandInteractionData;
+
+// TODO: #[aliases("cuisine", "dinner", "lunch", "breakfast", "snack")]
+async fn food(_: &Context, _: &ApplicationCommandInteractionData) -> CommandResult<String> {
     let responses = vec![
         "Asian", "Barbecue", "Burgers", "Italian", "Mexican", "Pho", "Pizza", "Steak", "Seafood",
         "Indian", "Cajun",
@@ -15,7 +14,13 @@ async fn food(ctx: &Context, msg: &Message) -> CommandResult {
 
     let item = responses.choose(&mut rand::thread_rng()).unwrap();
 
-    let _ = msg.channel_id.say(&ctx.http, item).await;
-
-    Ok(())
+    Ok(item.to_string())
 }
+
+make_slash_command_handler!(FoodHandler, food);
+
+pub(crate) static FOOD_COMMAND: SlashCommand = SlashCommand {
+    description: "Reply with a suggestion for cuisine.",
+    handler: &FoodHandler,
+    options: vec![],
+};
