@@ -1,21 +1,19 @@
-use rand::seq::SliceRandom;
-use serenity::framework::standard::{macros::command, Args, CommandResult};
-use serenity::model::prelude::*;
-use serenity::prelude::*;
+use futures::future::BoxFuture;
+use futures::FutureExt;
+use rand::seq::IteratorRandom;
+use serenity::model::prelude::application_command::*;
 
-#[command]
-#[aliases("rand")]
-#[description = "Choose a ranfrom item from the list of inputs"]
-#[usage = "foo bar baz"]
-async fn random(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
-    let choices = args.raw().collect::<Vec<&str>>();
+// TODO: #[aliases("rand")]
 
-    let thing = choices.choose(&mut rand::thread_rng());
+pub fn handler(data: &ApplicationCommandInteractionData) -> BoxFuture<'static, Option<String>> {
+    let arguments = super::get_string_arguments(data);
 
-    match thing {
-        Some(choice) => msg.channel_id.say(&ctx.http, choice).await?,
-        _ => msg.channel_id.say(&ctx.http, "Why u no args?!").await?,
+    let thing = arguments.values().choose(&mut rand::thread_rng());
+
+    let response = match thing {
+        Some(&choice) => choice.to_owned(),
+        _ => "Why u no args?!".to_owned(),
     };
 
-    Ok(())
+    async move { Some(response) }.boxed()
 }

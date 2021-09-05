@@ -21,7 +21,10 @@ use serenity::{
     },
     http::Http,
     model::{
-        channel::Message, event::ResumedEvent, gateway::Ready, interactions::Interaction,
+        channel::Message,
+        event::ResumedEvent,
+        gateway::Ready,
+        interactions::{application_command::ApplicationCommandInteractionData, Interaction},
         prelude::UserId,
     },
     prelude::*,
@@ -36,8 +39,7 @@ use tracing_subscriber::{EnvFilter, FmtSubscriber};
 
 // Re import desc::*,  when its ready
 use commands::{
-    advice::*, ball::*, desc::*, drink::*, food::*, github::*, owner::*, pingpong::*, random::*,
-    stonks::*,
+    advice::*, ball::*, desc::*, drink::*, food::*, github::*, owner::*, pingpong::*, stonks::*,
 };
 
 struct ShardManagerContainer;
@@ -55,9 +57,16 @@ impl TypeMapKey for PostgresClient {
     type Value = diesel::r2d2::ConnectionManager<diesel::pg::PgConnection>;
 }
 
+struct SlashCommandOption {
+    name: String,
+    required: bool,
+    description: String,
+}
+
 struct SlashCommand {
     description: &'static str,
-    handler: fn() -> BoxFuture<'static, Option<String>>,
+    handler: fn(&ApplicationCommandInteractionData) -> BoxFuture<'static, Option<String>>,
+    options: Vec<SlashCommandOption>,
 }
 
 struct Handler {
@@ -75,7 +84,22 @@ impl EventHandler for Handler {
                     .id()
                     .create_application_command(&ctx.http, |cmd| {
                         cmd.name(name.to_owned());
-                        cmd.description(command.description.to_owned())
+                        cmd.description(command.description.to_owned());
+
+                        for option in &command.options {
+                            cmd.create_option(  |o| {
+                                o.kind(serenity::model::interactions::application_command::ApplicationCommandOptionType::String);
+                                o.name(option.name.clone());
+                                o.description(option.description.clone());
+                                o.required(option.required);
+
+                            o
+                            }
+
+                            );
+                        }
+
+                        cmd
                     })
                     .await;
 
@@ -107,7 +131,7 @@ impl EventHandler for Handler {
             None => return,
         };
 
-        let response = (command.handler)().await;
+        let response = (command.handler)(&application_command.data).await;
 
         if let Some(text) = response {
             let api_response = application_command.create_interaction_response(ctx.http, |r| {
@@ -128,21 +152,7 @@ impl EventHandler for Handler {
 
 #[group]
 #[commands(
-    advice,
-    ball,
-    define,
-    describe,
-    description,
-    drink,
-    fart,
-    food,
-    github,
-    ping,
-    price,
-    quit,
-    random,
-    stonkcomp,
-    stonks
+    advice, ball, define, describe, drink, fart, food, github, ping, price, quit, stonkcomp, stonks
 )]
 
 struct General;
@@ -265,11 +275,25 @@ async fn main() {
         Err(why) => panic!("Could not access application info: {:?}", why),
     };
 
+    let random_command = SlashCommand {
+        description: "Choose a random item from the list of inputs",
+        options: (1..=25)
+            .map(|i| SlashCommandOption {
+                name: format!("choice{}", i),
+                required: false,
+                description: format!("Choice {}", i),
+            })
+            .collect(),
+        handler: commands::random::handler,
+    };
+
     let slash_commands = maplit::hashmap! {
         "botsnack" => SlashCommand {
             description:  "A bot's gotta eat....",
             handler: commands::botsnack::botsnack,
-        }
+            options: vec![],
+        },
+        "random" => random_command,
     };
 
     // Create the framework
