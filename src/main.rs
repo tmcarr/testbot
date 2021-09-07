@@ -23,7 +23,10 @@ use serenity::{
         channel::Message,
         event::ResumedEvent,
         gateway::Ready,
-        interactions::{application_command::ApplicationCommandInteractionData, Interaction},
+        interactions::application_command::{
+            ApplicationCommandInteractionData, ApplicationCommandOptionType,
+        },
+        interactions::Interaction,
         prelude::UserId,
     },
     prelude::*,
@@ -85,24 +88,79 @@ impl EventHandler for Handler {
         info!("Connected as {}", ready.user.name);
 
         for guild in ready.guilds {
+            let guild_id = guild.id();
+
+            let existing_commands = guild_id.get_application_commands(&ctx.http).await;
+            let existing_commands = match existing_commands {
+                Ok(x) => x,
+                Err(e) => {
+                    error!("Failed to get existing commands: {:?}", e);
+                    return;
+                }
+            };
+            let existing_commands = existing_commands
+                .into_iter()
+                .map(|c| (c.name.clone(), c))
+                .collect::<HashMap<_, _>>();
+
+            // clean up previously-registered commands that are no longer needed -- ideally, Discord
+            // would do this when the bot disconnects, but command registration seems to have an
+            // infinite lifetime.
+            for (old_name, old_command) in existing_commands.iter() {
+                if !self.slash_commands.contains_key(old_name.as_str()) {
+                    info!(
+                        "Removing old command {} (id: {}) that is no longer referenced",
+                        old_name, old_command.id
+                    );
+                    guild_id
+                        .delete_application_command(&ctx.http, old_command.id)
+                        .await
+                        .unwrap_or_else(|e| error!("Could not delete {}: {:?}", old_name, e));
+                }
+            }
+
             for (&name, command) in self.slash_commands.iter() {
-                let result = guild
-                    .id()
+                match existing_commands.get(name) {
+                    Some(old_command) => {
+                        let all_options_match =
+                            command.options.iter().zip(old_command.options.iter()).all(
+                                |(expected, old)| {
+                                    // String is the only option type we will create, so expect that from the API.
+                                    old.kind == ApplicationCommandOptionType::String
+                                        && old.name == expected.name
+                                        && old.description == expected.description
+                                        && old.required == expected.required
+                                },
+                            );
+                        if all_options_match {
+                            info!(
+                                "Previously-registered command {} has expected options, ignoring.",
+                                name
+                            );
+                            continue;
+                        } else {
+                            info!("Previously-registered command {} has different options, re-registering.", name);
+                        }
+                    }
+                    None => {
+                        info!("Command {} is new, registering.", name);
+                    }
+                }
+
+                let result = guild_id
                     .create_application_command(&ctx.http, |cmd| {
                         cmd.name(name.to_owned());
                         cmd.description(command.description.to_owned());
 
                         for option in &command.options {
-                            cmd.create_option(  |o| {
-                                o.kind(serenity::model::interactions::application_command::ApplicationCommandOptionType::String);
+                            cmd.create_option(|o| {
+                                o.kind(ApplicationCommandOptionType::String);
                                 o.name(option.name.clone());
                                 o.description(option.description.clone());
                                 o.required(option.required);
 
-                            o
-                            }
-
-                            );
+                                o
+                            });
                         }
 
                         cmd
