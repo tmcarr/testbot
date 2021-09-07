@@ -26,7 +26,7 @@ use serenity::{
         interactions::application_command::{
             ApplicationCommandInteractionData, ApplicationCommandOptionType,
         },
-        interactions::Interaction,
+        interactions::{Interaction, InteractionResponseType},
         prelude::UserId,
     },
     prelude::*,
@@ -200,15 +200,23 @@ impl EventHandler for Handler {
             .handle(&ctx, &application_command.data)
             .await;
 
-        if let Ok(text) = response {
-            let api_response = application_command.create_interaction_response(ctx.http, |r| {
-                r.kind(serenity::model::interactions::InteractionResponseType::ChannelMessageWithSource)
-                .interaction_response_data(|message| message.content(text))
-            }).await;
+        match response {
+            Ok(text) => {
+                let api_response = application_command
+                    .create_interaction_response(ctx.http, |r| {
+                        r.kind(InteractionResponseType::ChannelMessageWithSource)
+                            .interaction_response_data(|message| message.content(text))
+                    })
+                    .await;
 
-            if let Err(e) = api_response {
-                error!("Error sending bot response: {:?}", e);
+                if let Err(e) = api_response {
+                    error!("Error sending bot response: {:?}", e);
+                }
             }
+            Err(e) => error!(
+                "Handler for command {} failed: {:?}",
+                application_command.data.name, e
+            ),
         }
     }
 
