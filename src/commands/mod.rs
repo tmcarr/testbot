@@ -30,6 +30,12 @@ pub mod pingpong;
 pub mod random;
 pub mod stonks;
 
+#[derive(thiserror::Error, Debug)]
+enum CommandError {
+    #[error("One or more options is missing from the Discord API")]
+    OptionMissing,
+}
+
 fn get_string_arguments(
     data: &crate::ApplicationCommandInteractionData,
 ) -> std::collections::HashMap<&str, &str> {

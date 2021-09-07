@@ -53,6 +53,7 @@ impl TypeMapKey for PostgresClient {
     type Value = diesel::r2d2::ConnectionManager<diesel::pg::PgConnection>;
 }
 
+#[derive(Clone)]
 struct SlashCommandOption {
     name: String,
     required: bool,
@@ -285,14 +286,18 @@ async fn main() {
         "8ball" => &*commands::ball::BALL_COMMAND,
         "advice" => &commands::advice::ADVICE_COMMAND,
         "botsnack" => &commands::botsnack::BOTSNACK_COMMAND,
+        "company" => &*commands::stonks::COMPANY_COMMAND,
         "cuisine" => &commands::food::FOOD_COMMAND,
         "define" => &*commands::desc::DEFINE_COMMAND,
         "describe" => &*commands::desc::DESCRIBE_COMMAND,
         "drink" => &commands::drink::DRINK_COMMAND,
         "fart" => &commands::pingpong::FART_COMMAND,
         "ping" => &commands::pingpong::PING_COMMAND,
+        "price" => &*commands::stonks::PRICE_COMMAND,
         "random" => &*commands::random::RANDOM_COMMAND,
         "source" => &commands::github::GITHUB_COMMAND,
+        "stonks" => &*commands::stonks::STONKS_COMMAND,
+        "stonkcomp" => &*commands::stonks::STONKCOMP_COMMAND,
     };
 
     // Create the framework

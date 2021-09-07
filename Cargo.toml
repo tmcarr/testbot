@@ -9,6 +9,7 @@ readme = "README.md"
 
 [dependencies]
 env_logger = "0.8.3"
+itertools = "0.10"
 lazy_static = "1.4"
 log = "0.4.14"
 maplit = "1.0"

@@ -10,12 +10,6 @@ use serenity::client::Context;
 use serenity::framework::standard::CommandResult;
 use serenity::model::interactions::application_command::ApplicationCommandInteractionData;
 
-#[derive(thiserror::Error, Debug)]
-enum DescribeError {
-    #[error("One or more options is missing from the Discord API")]
-    OptionMissing,
-}
-
 // TODO: #[aliases("set")]
 async fn describe(ctx: &Context, input_key: &str, input_value: &str) -> CommandResult<String> {
     let data = ctx.data.read().await;
@@ -49,7 +43,7 @@ async fn handle_describe(
 
     match (arguments.get("key"), arguments.get("value")) {
         (Some(&input_key), Some(&input_value)) => describe(ctx, input_key, input_value).await,
-        _ => Err(Box::new(DescribeError::OptionMissing)),
+        _ => Err(Box::new(super::CommandError::OptionMissing)),
     }
 }
 
@@ -105,7 +99,7 @@ async fn handle_define(
 ) -> CommandResult<String> {
     match super::get_string_arguments(data).get("key") {
         Some(&input_key) => define(ctx, input_key).await,
-        None => Err(Box::new(DescribeError::OptionMissing)),
+        None => Err(Box::new(super::CommandError::OptionMissing)),
     }
 }
 

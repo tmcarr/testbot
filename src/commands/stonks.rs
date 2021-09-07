@@ -1,49 +1,92 @@
+use itertools::Itertools;
 use serde::de;
 use serde::{self, Deserialize, Deserializer};
-use serenity::framework::standard::{macros::command, Args, CommandResult};
-use serenity::model::prelude::*;
+use serenity::framework::standard::CommandResult;
+use serenity::model::interactions::application_command::ApplicationCommandInteractionData;
 use serenity::prelude::*;
 use serenity::utils::MessageBuilder;
 use std::fmt::Display;
 use std::str::FromStr;
 
 use crate::AlphaVantageApiToken;
+use crate::{SlashCommand, SlashCommandOption};
 
-#[command]
-#[aliases("stocks", "stock", "stonks", "stonk")]
-#[description = "Display the Finviz graph for a given ticker."]
-#[usage = "TWTR"]
-async fn stonks(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-    for stonk in args.iter::<String>() {
-        let _ = msg
-            .channel_id
-            .say(
-                &ctx.http,
-                &format!(
-                    "https://www.finviz.com/chart.ashx?t={}&ty=c&ta=1&p=d&s=l",
-                    &stonk.unwrap()
-                ),
-            )
-            .await;
-    }
-    Ok(())
+lazy_static::lazy_static! {
+    static ref SINGLE_STOCK: Vec<SlashCommandOption> = vec![SlashCommandOption {
+        name: "stock".to_string(),
+        description: "ticker symbol".to_string(),
+        required: true,
+    }];
+
+    static ref MULTIPLE_STOCKS: Vec<SlashCommandOption> = {
+        let mut options = SINGLE_STOCK.clone();
+
+        options.extend((2..=25).map(|i| SlashCommandOption {
+            name: format!("stock{}", i),
+            description: "ticker symbol".to_string(),
+            required: false,
+        }));
+
+        options
+    };
+
+    // This lets us iterate through the arguments in the same order the user would have specified
+    // them, as otherwise the HashMap iterates in an a random order.
+    static ref MULTIPLE_STOCKS_KEYS: Vec<String> = {
+        let mut keys = vec!["stock".to_owned()];
+        keys.extend((2..=25).map(|i| format!("stock{}", i)));
+        keys
+    };
 }
 
-#[command]
-#[aliases("stockcomp", "s&pcomp")]
-#[description = "Display a graphic showing performance information about a ticker compared to the S&P500"]
-#[usage = "~stonkcomp TWTR"]
-async fn stonkcomp(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
-    for stonk in args.iter::<String>() {
-        let _ = msg
-            .channel_id
-            .say(
-                &ctx.http,
-                &format!("https://stonks.egd.pw/spcomp?symbol={}", &stonk.unwrap()),
-            )
-            .await;
+// TODO: #[aliases("stocks", "stock", "stonks", "stonk")]
+async fn stonks(_ctx: &Context, data: &ApplicationCommandInteractionData) -> CommandResult<String> {
+    let arguments = super::get_string_arguments(data);
+    let mut reply = vec![];
+    for key in MULTIPLE_STOCKS_KEYS.iter() {
+        if let Some(&stonk) = arguments.get(key.as_str()) {
+            reply.push(format!(
+                "https://www.finviz.com/chart.ashx?t={}&ty=c&ta=1&p=d&s=l",
+                stonk
+            ))
+        }
     }
-    Ok(())
+    Ok(reply.iter().join("\n"))
+}
+
+make_slash_command_handler!(StonksHandler, stonks);
+
+lazy_static::lazy_static! {
+    pub(crate) static ref STONKS_COMMAND: SlashCommand = SlashCommand {
+        description: "Display the Finviz graph for a given ticker.",
+        options: MULTIPLE_STOCKS.clone(),
+        handler: &StonksHandler,
+    };
+}
+
+// TODO: #[aliases("stockcomp", "s&pcomp")]
+async fn stonkcomp(
+    _ctx: &Context,
+    data: &ApplicationCommandInteractionData,
+) -> CommandResult<String> {
+    let arguments = super::get_string_arguments(data);
+    let mut reply = vec![];
+    for key in MULTIPLE_STOCKS_KEYS.iter() {
+        if let Some(&stonk) = arguments.get(key.as_str()) {
+            reply.push(format!("https://stonks.egd.pw/spcomp?symbol={}", stonk));
+        }
+    }
+    Ok(reply.iter().join("\n"))
+}
+
+make_slash_command_handler!(StonkcompHandler, stonkcomp);
+
+lazy_static::lazy_static! {
+    pub(crate) static ref STONKCOMP_COMMAND: SlashCommand = SlashCommand {
+        description: "Display a graphic showing performance information about a ticker compared to the S&P500",
+        options: MULTIPLE_STOCKS.clone(),
+        handler: &StonkcompHandler,
+    };
 }
 
 // Example Response at https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=IBM&apikey=demo
@@ -97,13 +140,13 @@ struct GlobalQuote {
     quote: Quote,
 }
 
-#[command]
-#[aliases("p")]
-#[description = "Find price information about a ticker"]
-#[usage = "TWTR"]
-async fn price(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+// TODO: #[aliases("p")]
+async fn price(ctx: &Context, data: &ApplicationCommandInteractionData) -> CommandResult<String> {
     let api_token = get_api_token(ctx).await;
-    let ticker = args.single::<String>().unwrap();
+    let arguments = super::get_string_arguments(data);
+    let ticker = arguments
+        .get("stock")
+        .ok_or_else(|| Box::new(super::CommandError::OptionMissing))?;
     let endpoint = format!(
         "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={}&apikey={}",
         ticker, api_token
@@ -135,9 +178,17 @@ async fn price(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
         ))
         .build();
 
-    let _ = msg.channel_id.say(&ctx.http, message).await?;
+    Ok(message)
+}
 
-    Ok(())
+make_slash_command_handler!(PriceHandler, price);
+
+lazy_static::lazy_static! {
+    pub(crate) static ref PRICE_COMMAND: SlashCommand = SlashCommand {
+        description: "Find price information about a ticker",
+        options: SINGLE_STOCK.clone(),
+        handler: &PriceHandler,
+    };
 }
 
 // Example output here: https://www.alphavantage.co/query?function=OVERVIEW&symbol=IBM&apikey=demo
@@ -263,22 +314,29 @@ struct Overview {
     lastsplitdate: String,
 }
 
-#[command]
-#[aliases("d", "company")]
-#[description = "Find a summary of a company from its ticker."]
-#[usage = "TWTR"]
-async fn description(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+async fn company(ctx: &Context, data: &ApplicationCommandInteractionData) -> CommandResult<String> {
     let api_token = get_api_token(ctx).await;
-    let ticker = args.single::<String>().unwrap();
+    let arguments = super::get_string_arguments(data);
+    let ticker = arguments
+        .get("stock")
+        .ok_or_else(|| Box::new(super::CommandError::OptionMissing))?;
     let endpoint = format!(
         "https://www.alphavantage.co/query?function=OVERVIEW&symbol={}&apikey={}",
         ticker, api_token
     );
     let profile = reqwest::get(&endpoint).await?.json::<Overview>().await?;
 
-    let _ = msg.channel_id.say(&ctx.http, profile.description).await?;
+    Ok(profile.description)
+}
 
-    Ok(())
+make_slash_command_handler!(CompanyHandler, company);
+
+lazy_static::lazy_static! {
+    pub(crate) static ref COMPANY_COMMAND: SlashCommand = SlashCommand {
+        description:  "Find a summary of a company from its ticker.",
+        options: SINGLE_STOCK.clone(),
+        handler: &PriceHandler,
+    };
 }
 
 async fn get_api_token(ctx: &Context) -> String {
