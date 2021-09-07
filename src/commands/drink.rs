@@ -1,13 +1,11 @@
-use rand::seq::SliceRandom;
-use serenity::framework::standard::{macros::command, CommandResult};
-use serenity::model::prelude::*;
-use serenity::prelude::*;
+use crate::SlashCommand;
 
-#[command]
-#[aliases("drink", "drinks", "drank")]
-#[description = "Reply with a suggestion of fine beverage."]
-#[usage = ""]
-async fn drink(ctx: &Context, msg: &Message) -> CommandResult {
+use rand::seq::SliceRandom;
+use serenity::client::Context;
+use serenity::framework::standard::CommandResult;
+use serenity::model::interactions::application_command::ApplicationCommandInteractionData;
+
+async fn drink(_: &Context, _: &ApplicationCommandInteractionData) -> CommandResult<String> {
     let responses = vec![
         "Water.",
         "Topo Chico",
@@ -27,7 +25,13 @@ async fn drink(ctx: &Context, msg: &Message) -> CommandResult {
 
     let drink = responses.choose(&mut rand::thread_rng()).unwrap();
 
-    let _ = msg.channel_id.say(&ctx.http, drink).await;
-
-    Ok(())
+    Ok(drink.to_string())
 }
+
+make_slash_command_handler!(DrinkHandler, drink);
+
+pub(crate) static DRINK_COMMAND: SlashCommand = SlashCommand {
+    description: "Reply with a suggestion of fine beverage.",
+    handler: &DrinkHandler,
+    options: vec![],
+};

@@ -19,18 +19,27 @@ use serenity::{
         StandardFramework,
     },
     http::Http,
-    model::{channel::Message, event::ResumedEvent, gateway::Ready, prelude::UserId},
+    model::{
+        channel::Message,
+        event::ResumedEvent,
+        gateway::Ready,
+        interactions::application_command::{
+            ApplicationCommandInteractionData, ApplicationCommandOptionType,
+        },
+        interactions::{Interaction, InteractionResponseType},
+        prelude::UserId,
+    },
     prelude::*,
 };
-use std::{collections::HashSet, env, sync::Arc};
-use tracing::{error, info, instrument};
+use std::{
+    collections::{HashMap, HashSet},
+    env,
+    sync::Arc,
+};
+use tracing::{debug, error, info, instrument};
 use tracing_subscriber::{EnvFilter, FmtSubscriber};
 
-// Re import desc::*,  when its ready
-use commands::{
-    advice::*, ball::*, botsnack::*, desc::*, drink::*, food::*, github::*, owner::*, pingpong::*,
-    random::*, stonks::*,
-};
+use commands::owner::*;
 
 struct ShardManagerContainer;
 impl TypeMapKey for ShardManagerContainer {
@@ -47,12 +56,168 @@ impl TypeMapKey for PostgresClient {
     type Value = diesel::r2d2::ConnectionManager<diesel::pg::PgConnection>;
 }
 
-struct Handler;
+#[derive(Clone)]
+struct SlashCommandOption {
+    name: String,
+    required: bool,
+    description: String,
+}
+
+#[async_trait]
+trait SlashCommandHandler {
+    async fn handle(
+        &self,
+        ctx: &Context,
+        data: &ApplicationCommandInteractionData,
+    ) -> CommandResult<String>;
+}
+
+struct SlashCommand {
+    description: &'static str,
+    handler: &'static (dyn SlashCommandHandler + Send + Sync),
+    options: Vec<SlashCommandOption>,
+}
+
+struct Handler {
+    slash_commands: HashMap<&'static str, &'static SlashCommand>,
+}
 
 #[async_trait]
 impl EventHandler for Handler {
-    async fn ready(&self, _: Context, ready: Ready) {
+    async fn ready(&self, ctx: Context, ready: Ready) {
         info!("Connected as {}", ready.user.name);
+
+        for guild in ready.guilds {
+            let guild_id = guild.id();
+
+            let existing_commands = guild_id.get_application_commands(&ctx.http).await;
+            let existing_commands = match existing_commands {
+                Ok(x) => x,
+                Err(e) => {
+                    error!("Failed to get existing commands: {:?}", e);
+                    return;
+                }
+            };
+            let existing_commands = existing_commands
+                .into_iter()
+                .map(|c| (c.name.clone(), c))
+                .collect::<HashMap<_, _>>();
+
+            // clean up previously-registered commands that are no longer needed -- ideally, Discord
+            // would do this when the bot disconnects, but command registration seems to have an
+            // infinite lifetime.
+            for (old_name, old_command) in existing_commands.iter() {
+                if !self.slash_commands.contains_key(old_name.as_str()) {
+                    info!(
+                        "Removing old command {} (id: {}) that is no longer referenced",
+                        old_name, old_command.id
+                    );
+                    guild_id
+                        .delete_application_command(&ctx.http, old_command.id)
+                        .await
+                        .unwrap_or_else(|e| error!("Could not delete {}: {:?}", old_name, e));
+                }
+            }
+
+            for (&name, command) in self.slash_commands.iter() {
+                match existing_commands.get(name) {
+                    Some(old_command) => {
+                        let all_options_match =
+                            command.options.iter().zip(old_command.options.iter()).all(
+                                |(expected, old)| {
+                                    // String is the only option type we will create, so expect that from the API.
+                                    old.kind == ApplicationCommandOptionType::String
+                                        && old.name == expected.name
+                                        && old.description == expected.description
+                                        && old.required == expected.required
+                                },
+                            );
+                        if all_options_match {
+                            info!(
+                                "Previously-registered command {} has expected options, ignoring.",
+                                name
+                            );
+                            continue;
+                        } else {
+                            info!("Previously-registered command {} has different options, re-registering.", name);
+                        }
+                    }
+                    None => {
+                        info!("Command {} is new, registering.", name);
+                    }
+                }
+
+                let result = guild_id
+                    .create_application_command(&ctx.http, |cmd| {
+                        cmd.name(name.to_owned());
+                        cmd.description(command.description.to_owned());
+
+                        for option in &command.options {
+                            cmd.create_option(|o| {
+                                o.kind(ApplicationCommandOptionType::String);
+                                o.name(option.name.clone());
+                                o.description(option.description.clone());
+                                o.required(option.required);
+
+                                o
+                            });
+                        }
+
+                        cmd
+                    })
+                    .await;
+
+                match result {
+                    Err(e) => error!("Could not register {}: {:?}", name, e),
+                    Ok(res) => info!("Registered {}: {:?}", name, res),
+                }
+            }
+        }
+    }
+
+    async fn interaction_create(
+        &self,
+        ctx: Context,
+        interaction: serenity::model::interactions::Interaction,
+    ) {
+        debug!("Handling interaction: {:?}", interaction);
+
+        let application_command = match interaction {
+            Interaction::ApplicationCommand(ref ac) => ac,
+            _ => return,
+        };
+
+        let command = match self
+            .slash_commands
+            .get(application_command.data.name.as_str())
+        {
+            Some(c) => c,
+            None => return,
+        };
+
+        let response = command
+            .handler
+            .handle(&ctx, &application_command.data)
+            .await;
+
+        match response {
+            Ok(text) => {
+                let api_response = application_command
+                    .create_interaction_response(ctx.http, |r| {
+                        r.kind(InteractionResponseType::ChannelMessageWithSource)
+                            .interaction_response_data(|message| message.content(text))
+                    })
+                    .await;
+
+                if let Err(e) = api_response {
+                    error!("Error sending bot response: {:?}", e);
+                }
+            }
+            Err(e) => error!(
+                "Handler for command {} failed: {:?}",
+                application_command.data.name, e
+            ),
+        }
     }
 
     async fn resume(&self, _: Context, _: ResumedEvent) {
@@ -61,24 +226,7 @@ impl EventHandler for Handler {
 }
 
 #[group]
-#[commands(
-    advice,
-    ball,
-    botsnack,
-    define,
-    describe,
-    description,
-    drink,
-    fart,
-    food,
-    github,
-    ping,
-    price,
-    quit,
-    random,
-    stonkcomp,
-    stonks
-)]
+#[commands(quit)]
 
 struct General;
 
@@ -171,10 +319,14 @@ async fn main() {
     tracing::subscriber::set_global_default(subscriber).expect("Failed to start the logger");
 
     let token = env::var("DISCORD_TOKEN").expect("Failed to load DISCORD_TOKEN from environment.");
+    let application_id = env::var("DISCORD_APPLICATION_ID")
+        .expect("Failed to load DISCORD_APPLICATION_ID from environment.")
+        .parse()
+        .expect("Application ID must be an integer");
     let alphavantage_token =
         env::var("ALPHAVANTAGE").expect("Failed to retrieve alphavantage API token.");
     let database_url = env::var("DATABASE_URL").expect("Unable to read Database URL.");
-    let http = Http::new_with_token(&token);
+    let http = Http::new_with_token_application_id(&token, application_id);
 
     // Create DB client
     let connection_manager = diesel::r2d2::ConnectionManager::new(database_url);
@@ -196,6 +348,24 @@ async fn main() {
         Err(why) => panic!("Could not access application info: {:?}", why),
     };
 
+    let slash_commands = maplit::hashmap! {
+        "8ball" => &*commands::ball::BALL_COMMAND,
+        "advice" => &commands::advice::ADVICE_COMMAND,
+        "botsnack" => &commands::botsnack::BOTSNACK_COMMAND,
+        "company" => &*commands::stonks::COMPANY_COMMAND,
+        "cuisine" => &commands::food::FOOD_COMMAND,
+        "define" => &*commands::desc::DEFINE_COMMAND,
+        "describe" => &*commands::desc::DESCRIBE_COMMAND,
+        "drink" => &commands::drink::DRINK_COMMAND,
+        "fart" => &commands::pingpong::FART_COMMAND,
+        "ping" => &commands::pingpong::PING_COMMAND,
+        "price" => &*commands::stonks::PRICE_COMMAND,
+        "random" => &*commands::random::RANDOM_COMMAND,
+        "source" => &commands::github::GITHUB_COMMAND,
+        "stonks" => &*commands::stonks::STONKS_COMMAND,
+        "stonkcomp" => &*commands::stonks::STONKCOMP_COMMAND,
+    };
+
     // Create the framework
     let framework = StandardFramework::new()
         .configure(|c| {
@@ -214,8 +384,9 @@ async fn main() {
         .help(&MY_HELP);
 
     let mut client = Client::builder(&token)
+        .application_id(application_id)
         .framework(framework)
-        .event_handler(Handler)
+        .event_handler(Handler { slash_commands })
         .await
         .expect("Err creating client");
 

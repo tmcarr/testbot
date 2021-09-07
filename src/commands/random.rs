@@ -1,21 +1,36 @@
-use rand::seq::SliceRandom;
-use serenity::framework::standard::{macros::command, Args, CommandResult};
-use serenity::model::prelude::*;
-use serenity::prelude::*;
+use crate::{SlashCommand, SlashCommandOption};
 
-#[command]
-#[aliases("rand")]
-#[description = "Choose a ranfrom item from the list of inputs"]
-#[usage = "foo bar baz"]
-async fn random(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
-    let choices = args.raw().collect::<Vec<&str>>();
+use rand::seq::IteratorRandom;
+use serenity::client::Context;
+use serenity::framework::standard::CommandResult;
+use serenity::model::interactions::application_command::ApplicationCommandInteractionData;
 
-    let thing = choices.choose(&mut rand::thread_rng());
+// TODO: #[aliases("rand")]
+async fn random(_ctx: &Context, data: &ApplicationCommandInteractionData) -> CommandResult<String> {
+    let arguments = super::get_string_arguments(data);
 
-    match thing {
-        Some(choice) => msg.channel_id.say(&ctx.http, choice).await?,
-        _ => msg.channel_id.say(&ctx.http, "Why u no args?!").await?,
+    let thing = arguments.values().choose(&mut rand::thread_rng());
+
+    let response = match thing {
+        Some(&choice) => choice.to_owned(),
+        _ => "Why u no args?!".to_owned(),
     };
 
-    Ok(())
+    Ok(response)
+}
+
+make_slash_command_handler!(RandomHandler, random);
+
+lazy_static::lazy_static! {
+    pub(crate) static ref RANDOM_COMMAND: SlashCommand = SlashCommand {
+        description: "Choose a random item from the list of inputs",
+        options: (1..=25)
+            .map(|i| SlashCommandOption {
+                name: format!("choice{}", i),
+                required: false,
+                description: format!("Choice {}", i),
+            })
+            .collect(),
+        handler: &RandomHandler,
+    };
 }

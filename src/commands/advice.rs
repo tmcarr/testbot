@@ -1,7 +1,9 @@
+use crate::SlashCommand;
+
 use serde::Deserialize;
-use serenity::framework::standard::{macros::command, CommandResult};
-use serenity::model::prelude::*;
-use serenity::prelude::*;
+use serenity::client::Context;
+use serenity::framework::standard::CommandResult;
+use serenity::model::interactions::application_command::ApplicationCommandInteractionData;
 
 #[derive(Deserialize)]
 struct Slip {
@@ -14,14 +16,17 @@ struct Advice {
     slip: Slip,
 }
 
-#[command]
-#[description = "Asks for the advice of the gods and reveals their musings."]
-#[usage = ""]
-async fn advice(ctx: &Context, msg: &Message) -> CommandResult {
+async fn advice(_: &Context, _: &ApplicationCommandInteractionData) -> CommandResult<String> {
     const ENDPOINT: &str = "https://api.adviceslip.com/advice";
     let advice = reqwest::get(ENDPOINT).await?.json::<Advice>().await?;
     let results = format!("{} - #{}", advice.slip.advice, advice.slip.id);
-
-    let _ = msg.channel_id.say(&ctx.http, results).await;
-    Ok(())
+    Ok(results)
 }
+
+make_slash_command_handler!(AdviceHandler, advice);
+
+pub(crate) static ADVICE_COMMAND: SlashCommand = SlashCommand {
+    description: "Asks for the advice of the gods and reveals their musings.",
+    handler: &AdviceHandler,
+    options: vec![],
+};

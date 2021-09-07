@@ -1,16 +1,18 @@
-use serenity::framework::standard::{macros::command, CommandResult};
-use serenity::model::prelude::*;
-use serenity::prelude::*;
+use crate::SlashCommand;
 
-#[command]
-#[aliases("source")]
-#[description = "Reply with a link to the bot's source code"]
-#[usage = ""]
-async fn github(ctx: &Context, msg: &Message) -> CommandResult {
+use serenity::client::Context;
+use serenity::framework::standard::CommandResult;
+use serenity::model::interactions::application_command::ApplicationCommandInteractionData;
+
+async fn github(_: &Context, _: &ApplicationCommandInteractionData) -> CommandResult<String> {
     let github = "https://github.com/tmcarr/testbot";
-    let _ = msg
-        .channel_id
-        .say(&ctx.http, &format!("My code is at: {}", &github))
-        .await;
-    Ok(())
+    Ok(format!("My code is at: {}", &github))
 }
+
+make_slash_command_handler!(GithubHandler, github);
+
+pub(crate) static GITHUB_COMMAND: SlashCommand = SlashCommand {
+    description: "Reply with a link to the bot's source code",
+    handler: &GithubHandler,
+    options: vec![],
+};

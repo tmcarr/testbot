@@ -4,30 +4,20 @@ use crate::diesel::RunQueryDsl;
 use crate::models::*;
 use crate::schema::descriptions::dsl::*;
 use crate::PostgresClient;
+use crate::{SlashCommand, SlashCommandOption};
 use diesel::r2d2::ManageConnection;
-use serenity::framework::standard::{macros::command, Args, CommandResult};
-use serenity::model::prelude::*;
-use serenity::prelude::*;
+use serenity::client::Context;
+use serenity::framework::standard::CommandResult;
+use serenity::model::interactions::application_command::ApplicationCommandInteractionData;
 
-#[command]
-#[aliases("set")]
-async fn describe(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+// TODO: #[aliases("set")]
+async fn describe(ctx: &Context, input_key: &str, input_value: &str) -> CommandResult<String> {
     let data = ctx.data.read().await;
-    let input_key = args.single::<String>().unwrap();
-    let input_value = args.remains().unwrap();
 
     if let Some(dbclient) = data.get::<PostgresClient>() {
         let connection = dbclient.connect().expect("Could not connect to Postgres");
-        let _ = msg
-            .channel_id
-            .say(
-                &ctx.http,
-                &format!("Defining {} as: '{}'", &input_key, &input_value),
-            )
-            .await;
-
         let description = NewDescription {
-            key: &input_key,
+            key: input_key,
             value: input_value,
         };
         diesel::insert_into(descriptions)
@@ -36,26 +26,51 @@ async fn describe(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
             .do_update()
             .set(&description)
             .execute(&connection)?;
+        Ok(format!("Defining {} as: '{}'", input_key, input_value))
     } else {
-        msg.reply(
-            ctx,
-            &format!(
-                "There was a problem reading from the databse. Failed to define {} as '{}'",
-                &input_key, &input_value
-            ),
-        )
-        .await?;
-
-        return Ok(());
-    };
-    Ok(())
+        Ok(format!(
+            "There was a problem reading from the databse. Failed to define {} as '{}'",
+            input_key, input_value
+        ))
+    }
 }
 
-#[command]
-#[aliases("show", "get")]
-async fn define(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
+async fn handle_describe(
+    ctx: &Context,
+    data: &ApplicationCommandInteractionData,
+) -> CommandResult<String> {
+    let arguments = super::get_string_arguments(data);
+
+    match (arguments.get("key"), arguments.get("value")) {
+        (Some(&input_key), Some(&input_value)) => describe(ctx, input_key, input_value).await,
+        _ => Err(Box::new(super::CommandError::OptionMissing)),
+    }
+}
+
+make_slash_command_handler!(DescribeHandler, handle_describe);
+
+lazy_static::lazy_static! {
+    pub(crate) static ref DESCRIBE_COMMAND: SlashCommand = SlashCommand {
+        description: "Sets the stored definition for a word",
+        options: vec![
+            SlashCommandOption {
+                name: "key".to_string(),
+                description: "Key".to_string(),
+                required: true,
+            },
+            SlashCommandOption {
+                name: "value".to_string(),
+                description: "Its definition".to_string(),
+                required: true,
+            },
+        ],
+        handler: &DescribeHandler,
+    };
+}
+
+// TODO: #[aliases("show", "get")]
+async fn define(ctx: &Context, input_key: &str) -> CommandResult<String> {
     let data = ctx.data.read().await;
-    let input_key = args.single::<String>().unwrap();
 
     if let Some(dbclient) = data.get::<PostgresClient>() {
         let connection = dbclient.connect().expect("Could not connect to Postgres");
@@ -66,24 +81,40 @@ async fn define(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             .load::<Description>(&connection)
             .expect("Error loading results.");
 
-        let _ = msg
-            .channel_id
-            .say(
-                &ctx.http,
-                &format!("{} is decribed as: '{}'", input_key, &value_data[0].value),
-            )
-            .await;
+        Ok(format!(
+            "{} is decribed as: '{}'",
+            input_key, &value_data[0].value
+        ))
     } else {
-        msg.reply(
-            ctx,
-            &format!(
-                "There was a problem looking up the value for {}",
-                &input_key
-            ),
-        )
-        .await?;
-
-        return Ok(());
+        Ok(format!(
+            "There was a problem looking up the value for {}",
+            &input_key
+        ))
     }
-    Ok(())
+}
+
+async fn handle_define(
+    ctx: &Context,
+    data: &ApplicationCommandInteractionData,
+) -> CommandResult<String> {
+    match super::get_string_arguments(data).get("key") {
+        Some(&input_key) => define(ctx, input_key).await,
+        None => Err(Box::new(super::CommandError::OptionMissing)),
+    }
+}
+
+make_slash_command_handler!(DefineHandler, handle_define);
+
+lazy_static::lazy_static! {
+    pub(crate) static ref DEFINE_COMMAND: SlashCommand = SlashCommand {
+        description: "Retrieves the stored definition for a word",
+        options: vec![
+            SlashCommandOption {
+                name: "key".to_string(),
+                description: "Key".to_string(),
+                required: true,
+            },
+        ],
+        handler: &DefineHandler,
+    };
 }
