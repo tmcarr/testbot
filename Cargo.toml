@@ -17,7 +17,7 @@ serde_json = "1.0.68"
 tokio = { version = "1.13.0", features = ["macros", "rt-multi-thread", "time"] }
 tracing = "0.1.29"
 dotenv = "0.15"
-tracing-subscriber = "0.2"
+tracing-subscriber = { version = "0.3.1", features = ["std", "env-filter"] }
 
 
 [dependencies.serenity]
