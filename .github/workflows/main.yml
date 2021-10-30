@@ -55,17 +55,17 @@ jobs:
           command: clippy
           args: -- -D warnings
 
-  audit:
-    name: Github Audit
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout sources
-        uses: actions/checkout@v2
+  # audit:
+  #   name: Github Audit
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout sources
+  #       uses: actions/checkout@v2
 
-      - name: Run Audit
-        uses: actions-rs/audit-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Run Audit
+  #       uses: actions-rs/audit-check@v1
+  #       with:
+  #         token: ${{ secrets.GITHUB_TOKEN }}
 
   notify:
     runs-on: ubuntu-latest
