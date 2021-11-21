@@ -201,9 +201,11 @@ async fn main() {
         .configure(|c| {
             c.owners(owners)
                 .prefix("~")
+                .allow_dm(true)
                 .on_mention(Some(_bot_id))
                 .ignore_webhooks(true)
                 .ignore_bots(true)
+                .no_dm_prefix(true)
                 .case_insensitivity(true)
         })
         .before(before_hook)
