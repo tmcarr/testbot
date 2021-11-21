@@ -284,7 +284,7 @@ async fn main() {
         .after(after_hook)
         .unrecognised_command(unrecognized_command_hook)
         .on_dispatch_error(dispatch_error_hook)
-        // .group(&GENERAL_GROUP)
+        .group(&GENERAL_GROUP)
         .help(&MY_HELP);
 
     let mut client = Client::builder(&token)
