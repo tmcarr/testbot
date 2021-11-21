@@ -19,14 +19,25 @@ use serenity::{
         StandardFramework,
     },
     http::Http,
-    model::{channel::Message, event::ResumedEvent, gateway::Ready, prelude::UserId},
+    model::{
+        channel::Message,
+        event::ResumedEvent,
+        gateway::Ready,
+        id::GuildId,
+        interactions::{
+            application_command::{
+                ApplicationCommandInteractionDataOptionValue, ApplicationCommandOptionType,
+            },
+            Interaction, InteractionResponseType,
+        },
+        prelude::UserId,
+    },
     prelude::*,
 };
 use std::{collections::HashSet, env, sync::Arc};
 use tracing::{error, info, instrument};
 use tracing_subscriber::{EnvFilter, FmtSubscriber};
 
-// Re import desc::*,  when its ready
 use commands::{
     advice::*, ball::*, botsnack::*, desc::*, drink::*, food::*, github::*, owner::*, pingpong::*,
     random::*, stonks::*,
@@ -51,14 +62,75 @@ struct Handler;
 
 #[async_trait]
 impl EventHandler for Handler {
-    async fn ready(&self, _: Context, ready: Ready) {
+    async fn ready(&self, ctx: Context, ready: Ready) {
         info!("Connected as {}", ready.user.name);
+
+        let guild_id = GuildId(ready.guilds[0].id().0);
+
+        let _slashcommands = GuildId::set_application_commands(&guild_id, &ctx.http, |commands| {
+            commands
+                .create_application_command(|command| {
+                    command.name("ping").description("A ping command")
+                })
+                .create_application_command(|command| {
+                    command
+                        .name("id")
+                        .description("Get a user id")
+                        .create_option(|option| {
+                            option
+                                .name("id")
+                                .description("The user to lookup")
+                                .kind(ApplicationCommandOptionType::User)
+                                .required(true)
+                        })
+                })
+        });
     }
 
     async fn resume(&self, _: Context, _: ResumedEvent) {
         info!("Resumed");
     }
+
+    async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
+        if let Interaction::ApplicationCommand(command) = interaction {
+            let content = match command.data.name.as_str() {
+                "ping" => "Hey, I'm alive!".to_string(),
+                "id" => {
+                    let options = command
+                        .data
+                        .options
+                        .get(0)
+                        .expect("Expected user option")
+                        .resolved
+                        .as_ref()
+                        .expect("Expected user object");
+
+                    if let ApplicationCommandInteractionDataOptionValue::User(user, _member) =
+                        options
+                    {
+                        format!("{}'s id is {}", user.tag(), user.id)
+                    } else {
+                        "Please provide a valid user".to_string()
+                    }
+                }
+                _ => "not implemented :(".to_string(),
+            };
+
+            if let Err(why) = command
+                .create_interaction_response(&ctx.http, |response| {
+                    response
+                        .kind(InteractionResponseType::ChannelMessageWithSource)
+                        .interaction_response_data(|message| message.content(content))
+                })
+                .await
+            {
+                println!("Cannot respond to slash command: {}", why);
+            }
+        }
+    }
 }
+
+
 
 #[group]
 #[commands(
@@ -212,7 +284,7 @@ async fn main() {
         .after(after_hook)
         .unrecognised_command(unrecognized_command_hook)
         .on_dispatch_error(dispatch_error_hook)
-        .group(&GENERAL_GROUP)
+        // .group(&GENERAL_GROUP)
         .help(&MY_HELP);
 
     let mut client = Client::builder(&token)
