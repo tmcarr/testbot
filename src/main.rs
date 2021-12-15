@@ -240,6 +240,10 @@ async fn main() {
 
     tracing::subscriber::set_global_default(subscriber).expect("Failed to start the logger");
 
+    let app_id = env::var("DISCORD_APP_ID")
+        .expect("Failed to load DISCORD_APP_ID from the environment.")
+        .parse::<u64>()
+        .expect("Failed to parse DISCORD_APP_ID into u64.");
     let token = env::var("DISCORD_TOKEN").expect("Failed to load DISCORD_TOKEN from environment.");
     let alphavantage_token =
         env::var("ALPHAVANTAGE").expect("Failed to retrieve alphavantage API token.");
@@ -287,6 +291,7 @@ async fn main() {
 
     let mut client = Client::builder(&token)
         .framework(framework)
+        .application_id(app_id)
         .event_handler(Handler)
         .await
         .expect("Err creating client");
