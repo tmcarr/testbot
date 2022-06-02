@@ -36,16 +36,16 @@ features = [
     "rustls_backend",
     "unstable_discord_api"
 ]
-version = "^0.10.10"
+version = "0.11.2"
 
 
 
 [dependencies.diesel]
-version = "1.4.8"
+version = "2.0.0-rc.0"
 features = [
     "postgres",
     "r2d2",
 ]
 
 [dependencies.diesel_migrations]
-version = "1.4.0"
+version = "2.0.0-rc.0"
