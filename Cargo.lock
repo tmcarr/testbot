@@ -227,25 +227,23 @@ dependencies = [
 
 [[package]]
 name = "diesel"
-version = "2.0.0-rc.0"
+version = "1.4.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e531d0abf8147036383c88ce3785d9cda6fe1b8b1183021ffa01cf49c5819d24"
+checksum = "b28135ecf6b7d446b43e27e225622a038cc4e2930a1022f51cdb97ada19b8e4d"
 dependencies = [
  "bitflags",
  "byteorder",
  "diesel_derives",
- "itoa",
  "pq-sys",
  "r2d2",
 ]
 
 [[package]]
 name = "diesel_derives"
-version = "2.0.0-rc.0"
+version = "1.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "212ba0cdc611523c37f26c7b3b4aedb4af7cbfe9239c4e7736a8a7c82284d77b"
+checksum = "45f5098f628d02a7a0f68ddba586fb61e80edec3bdc1be3b921f4ceec60858d3"
 dependencies = [
- "proc-macro-error",
  "proc-macro2",
  "quote",
  "syn",
@@ -253,11 +251,10 @@ dependencies = [
 
 [[package]]
 name = "diesel_migrations"
-version = "2.0.0-rc.0"
+version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e2edcb7e9cff76af48e7fa33cc4680acc7df19e58a4a4aaed3e2b67fb83bc06d"
+checksum = "bf3cde8413353dc7f5d72fa8ce0b99a560a359d2c5ef1e5817ca731cd9008f4c"
 dependencies = [
- "diesel",
  "migrations_internals",
  "migrations_macros",
 ]
@@ -708,23 +705,23 @@ dependencies = [
 
 [[package]]
 name = "migrations_internals"
-version = "2.0.0-rc.0"
+version = "1.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "61e2226081f9176165a49b006a0729de8cafa749615b349e15c444dbd39e4d9d"
+checksum = "2b4fc84e4af020b837029e017966f86a1c2d5e83e64b589963d5047525995860"
 dependencies = [
- "serde",
- "toml",
+ "diesel",
 ]
 
 [[package]]
 name = "migrations_macros"
-version = "2.0.0-rc.0"
+version = "1.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "37dbadac6f186c134552cd9a0ec14b157cf4f04eacacebd5e6c1bfc6aeb158b3"
+checksum = "9753f12909fd8d923f75ae5c3258cae1ed3c8ec052e1b38c93c21a6d157f789c"
 dependencies = [
  "migrations_internals",
  "proc-macro2",
  "quote",
+ "syn",
 ]
 
 [[package]]
@@ -982,30 +979,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6ac25eee5a0582f45a67e837e350d784e7003bd29a5f460796772061ca49ffda"
 dependencies = [
  "vcpkg",
-]
-
-[[package]]
-name = "proc-macro-error"
-version = "1.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "da25490ff9892aab3fcf7c36f08cfb902dd3e71ca0f9f9517bea02a73a5ce38c"
-dependencies = [
- "proc-macro-error-attr",
- "proc-macro2",
- "quote",
- "syn",
- "version_check",
-]
-
-[[package]]
-name = "proc-macro-error-attr"
-version = "1.0.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a1be40180e52ecc98ad80b184934baf3d0d29f979574e439af5a55274b35f869"
-dependencies = [
- "proc-macro2",
- "quote",
- "version_check",
 ]
 
 [[package]]
