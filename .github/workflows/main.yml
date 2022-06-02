@@ -48,11 +48,13 @@ jobs:
           cargo install --locked cargo-pants || true
       - name: Check
         run: |
-          cargo deny check
-          cargo outdated --exit-code 1
+          # cargo deny check
           cargo udeps
           rm -rf ~/.cargo/advisory-db
           cargo audit
           cargo pants
       - name: Test
         run: cargo test
+      - name: Version Checks
+        run: |
+          cargo outdated -R
