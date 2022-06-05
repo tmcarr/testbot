@@ -40,7 +40,7 @@ async fn describe(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
         msg.reply(
             ctx,
             &format!(
-                "There was a problem reading from the databse. Failed to define {} as '{}'",
+                "There was a problem reading from the database. Failed to define {} as '{}'",
                 &input_key, &input_value
             ),
         )
@@ -70,7 +70,7 @@ async fn define(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
             .channel_id
             .say(
                 &ctx.http,
-                &format!("{} is decribed as: '{}'", input_key, &value_data[0].value),
+                &format!("{} is described as: '{}'", input_key, &value_data[0].value),
             )
             .await;
     } else {
