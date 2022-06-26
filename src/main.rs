@@ -182,7 +182,7 @@ async fn main() {
         };
 
         println!(
-            "A user named {:?} tried to executute an unknown command: {}",
+            "A user named {:?} tried to execute an unknown command: {}",
             msg.author.name, cmd_name
         );
     }
@@ -227,7 +227,7 @@ async fn main() {
     }
 
     // This will load the environment variables located at `./.env`, relative to
-    // the CWD. Primarially used for local testing.
+    // the CWD. Primarily used for local testing.
     dotenv::dotenv().ok();
 
     // Initialize the logger to use environment variables.
