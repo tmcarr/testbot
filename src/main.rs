@@ -18,18 +18,15 @@ use serenity::{
         help_commands, Args, CommandError, CommandGroup, CommandResult, DispatchError, HelpOptions,
         StandardFramework,
     },
-    http::Http,
+    http::HttpBuilder,
     model::{
+        application::interaction::{
+            application_command::CommandDataOptionValue, Interaction, InteractionResponseType,
+        },
         channel::Message,
         event::ResumedEvent,
         gateway::Ready,
         id::GuildId,
-        interactions::{
-            application_command::{
-                ApplicationCommandInteractionDataOptionValue, ApplicationCommandOptionType,
-            },
-            Interaction, InteractionResponseType,
-        },
         prelude::UserId,
     },
     prelude::*,
@@ -65,26 +62,26 @@ impl EventHandler for Handler {
     async fn ready(&self, ctx: Context, ready: Ready) {
         info!("Connected as {}", ready.user.name);
 
-        let guild_id = GuildId(ready.guilds[0].id().0);
+        // let guild_id = GuildId(ready.guilds[0].id());
 
-        let _slashcommands = GuildId::set_application_commands(&guild_id, &ctx.http, |commands| {
-            commands
-                .create_application_command(|command| {
-                    command.name("ping").description("A ping command")
-                })
-                .create_application_command(|command| {
-                    command
-                        .name("id")
-                        .description("Get a user id")
-                        .create_option(|option| {
-                            option
-                                .name("id")
-                                .description("The user to lookup")
-                                .kind(ApplicationCommandOptionType::User)
-                                .required(true)
-                        })
-                })
-        });
+        let _slashcommands =
+            GuildId::set_application_commands(&self, &ctx.http, |commands| {
+                commands
+                    .create_application_command(|command| {
+                        command.name("ping").description("A ping command")
+                    })
+                    .create_application_command(|command| {
+                        command
+                            .name("id")
+                            .description("Get a user id")
+                            .create_option(|option| {
+                                option
+                                    .name("id")
+                                    .description("The user to lookup")
+                                    .required(true)
+                            })
+                    })
+            });
     }
 
     async fn resume(&self, _: Context, _: ResumedEvent) {
@@ -105,9 +102,7 @@ impl EventHandler for Handler {
                         .as_ref()
                         .expect("Expected user object");
 
-                    if let ApplicationCommandInteractionDataOptionValue::User(user, _member) =
-                        options
-                    {
+                    if let CommandDataOptionValue::User(user, _member) = options {
                         format!("{}'s id is {}", user.tag(), user.id)
                     } else {
                         "Please provide a valid user".to_string()
@@ -248,7 +243,7 @@ async fn main() {
     let alphavantage_token =
         env::var("ALPHAVANTAGE").expect("Failed to retrieve alphavantage API token.");
     let database_url = env::var("DATABASE_URL").expect("Unable to read Database URL.");
-    let http = Http::new_with_token(&token);
+    let http = HttpBuilder::new(&token).build();
 
     // Create DB client
     let connection_manager = diesel::r2d2::ConnectionManager::new(database_url);
@@ -263,10 +258,12 @@ async fn main() {
     let (owners, _bot_id) = match http.get_current_application_info().await {
         Ok(info) => {
             let mut owners = HashSet::new();
-            owners.insert(info.owner.id);
-
-            (owners, info.id)
-        }
+                owners.insert(info.owner.id);
+            match http.get_current_user().await {
+                Ok(bot_id) => (owners, bot_id.id),
+                Err(why) => panic!("Could not access the bot id: {:?}", why),
+            }
+        },
         Err(why) => panic!("Could not access application info: {:?}", why),
     };
 
@@ -289,7 +286,7 @@ async fn main() {
         .group(&GENERAL_GROUP)
         .help(&MY_HELP);
 
-    let mut client = Client::builder(&token)
+    let mut client = Client::builder(&token, GatewayIntents::default())
         .framework(framework)
         .application_id(app_id)
         .event_handler(Handler)
