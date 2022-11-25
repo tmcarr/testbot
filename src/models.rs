@@ -7,7 +7,7 @@ pub struct Description {
 }
 
 #[derive(Insertable, AsChangeset)]
-#[table_name = "descriptions"]
+#[diesel(table_name = descriptions)]
 pub struct NewDescription<'a> {
     pub key: &'a str,
     pub value: &'a str,

@@ -17,7 +17,7 @@ async fn describe(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
     let input_value = args.remains().unwrap();
 
     if let Some(dbclient) = data.get::<PostgresClient>() {
-        let connection = dbclient.connect().expect("Could not connect to Postgres");
+        let mut connection = dbclient.connect().expect("Could not connect to Postgres");
         let _ = msg
             .channel_id
             .say(
@@ -35,7 +35,7 @@ async fn describe(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult
             .on_conflict(key)
             .do_update()
             .set(&description)
-            .execute(&connection)?;
+            .execute(&mut connection)?;
     } else {
         msg.reply(
             ctx,
@@ -58,12 +58,12 @@ async fn define(ctx: &Context, msg: &Message, mut args: Args) -> CommandResult {
     let input_key = args.single::<String>().unwrap();
 
     if let Some(dbclient) = data.get::<PostgresClient>() {
-        let connection = dbclient.connect().expect("Could not connect to Postgres");
+        let mut connection = dbclient.connect().expect("Could not connect to Postgres");
 
         // Do DB Read here
         let value_data = descriptions
             .filter(key.eq(&input_key))
-            .load::<Description>(&connection)
+            .load::<Description>(&mut connection)
             .expect("Error loading results.");
 
         let _ = msg

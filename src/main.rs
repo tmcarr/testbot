@@ -2,12 +2,12 @@ mod commands;
 mod models;
 mod schema;
 
-#[macro_use]
-extern crate diesel_migrations;
+// #[macro_use]
+// extern crate diesel_migrations;
 
 #[macro_use]
 extern crate diesel;
-
+use diesel::pg::Pg;
 use diesel::r2d2::ManageConnection;
 use serenity::{
     async_trait,
@@ -34,6 +34,7 @@ use serenity::{
     },
     prelude::*,
 };
+use std::error::Error;
 use std::{collections::HashSet, env, sync::Arc};
 use tracing::{error, info, instrument};
 use tracing_subscriber::{EnvFilter, FmtSubscriber};
@@ -42,6 +43,8 @@ use commands::{
     advice::*, ball::*, botsnack::*, desc::*, drink::*, food::*, github::*, owner::*, pingpong::*,
     random::*, stonks::*,
 };
+
+use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
 struct ShardManagerContainer;
 impl TypeMapKey for ShardManagerContainer {
@@ -152,7 +155,7 @@ impl EventHandler for Handler {
 
 struct General;
 
-embed_migrations!("migrations");
+pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
 
 #[tokio::main]
 #[instrument]
@@ -251,13 +254,26 @@ async fn main() {
     let http = Http::new_with_token(&token);
 
     // Create DB client
-    let connection_manager = diesel::r2d2::ConnectionManager::new(database_url);
+    let connection_manager: diesel::r2d2::ConnectionManager<diesel::pg::PgConnection> =
+        diesel::r2d2::ConnectionManager::new(database_url);
 
-    let db_client = connection_manager
+    let mut db_client: _ = connection_manager
         .connect()
         .expect("Could not connect to Postgres");
 
-    embedded_migrations::run(&db_client).expect("Could not run migrations");
+    fn run_migrations(
+        connection: &mut impl MigrationHarness<Pg>,
+    ) -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
+        // This will run the necessary migrations.
+        //
+        // See the documentation for `MigrationHarness` for
+        // all available methods.
+        connection.run_pending_migrations(MIGRATIONS)?;
+
+        Ok(())
+    }
+
+    run_migrations(&mut db_client).ok();
 
     // We will fetch your bot's owners and id
     let (owners, _bot_id) = match http.get_current_application_info().await {
