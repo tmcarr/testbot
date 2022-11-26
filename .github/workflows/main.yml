@@ -41,11 +41,11 @@ jobs:
           cargo clippy
       - name: Install cargo check tools
         run: |
-          cargo install --locked cargo-deny || true
+          # cargo install --locked cargo-deny || true
           cargo install --locked cargo-outdated || true
           cargo install --locked cargo-udeps || true
-          cargo install --locked cargo-audit || true
-          cargo install --locked cargo-pants || true
+          # cargo install --locked cargo-audit || true
+          # cargo install --locked cargo-pants || true
       - name: Check
         run: |
           # cargo deny check
