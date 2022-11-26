@@ -9,6 +9,7 @@ mod schema;
 extern crate diesel;
 use diesel::pg::Pg;
 use diesel::r2d2::ManageConnection;
+use dotenvy::dotenv;
 use serenity::{
     async_trait,
     client::bridge::gateway::ShardManager,
@@ -231,8 +232,8 @@ async fn main() {
 
     // This will load the environment variables located at `./.env`, relative to
     // the CWD. Primarily used for local testing.
-    dotenv::dotenv().ok();
-
+    // dotenv::dotenv().ok();
+    dotenv().ok();
     // Initialize the logger to use environment variables.
     //
     // In this case, a good default is setting the environment variable
