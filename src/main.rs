@@ -124,7 +124,7 @@ impl EventHandler for Handler {
                 })
                 .await
             {
-                println!("Cannot respond to slash command: {}", why);
+                println!("Cannot respond to slash command: {why}");
             }
         }
     }
@@ -173,7 +173,7 @@ async fn main() {
             Some(x) if x.is_alphabetic() => {
                 let _ = msg
                     .channel_id
-                    .say(ctx, format!("Unrecognized command: '{}'", cmd_name))
+                    .say(ctx, format!("Unrecognized command: '{cmd_name}'"))
                     .await;
             }
 
@@ -213,7 +213,7 @@ async fn main() {
     async fn after_hook(_: &Context, _: &Message, cmd_name: &str, error: Result<(), CommandError>) {
         //  Print out an error if it happened
         if let Err(why) = error {
-            println!("Error in {}: {:?}", cmd_name, why);
+            println!("Error in {cmd_name}: {why:?}");
         }
     }
 
@@ -287,10 +287,10 @@ async fn main() {
             }
             match http.get_current_user().await {
                 Ok(bot_id) => (owners, bot_id.id),
-                Err(why) => panic!("Could not access the bot id: {:?}", why),
+                Err(why) => panic!("Could not access the bot id: {why:?}"),
             }
         }
-        Err(why) => panic!("Could not access application info: {:?}", why),
+        Err(why) => panic!("Could not access application info: {why:?}"),
     };
 
     // Create the framework
