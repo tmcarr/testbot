@@ -21,18 +21,16 @@ use serenity::{
     },
     http::Http,
     model::{
+        application::command::CommandOptionType,
+        application::interaction::application_command::CommandDataOptionValue,
+        application::interaction::Interaction,
         channel::Message,
         event::ResumedEvent,
         gateway::Ready,
         id::GuildId,
-        interactions::{
-            application_command::{
-                ApplicationCommandInteractionDataOptionValue, ApplicationCommandOptionType,
-            },
-            Interaction, InteractionResponseType,
-        },
-        prelude::UserId,
+        prelude::{interaction::InteractionResponseType, UserId},
     },
+    prelude::GatewayIntents,
     prelude::*,
 };
 use std::error::Error;
@@ -69,7 +67,7 @@ impl EventHandler for Handler {
     async fn ready(&self, ctx: Context, ready: Ready) {
         info!("Connected as {}", ready.user.name);
 
-        let guild_id = GuildId(ready.guilds[0].id().0);
+        let guild_id = GuildId(ready.guilds[0].id.0);
 
         let _slashcommands = GuildId::set_application_commands(&guild_id, &ctx.http, |commands| {
             commands
@@ -84,7 +82,7 @@ impl EventHandler for Handler {
                             option
                                 .name("id")
                                 .description("The user to lookup")
-                                .kind(ApplicationCommandOptionType::User)
+                                .kind(CommandOptionType::User)
                                 .required(true)
                         })
                 })
@@ -109,9 +107,7 @@ impl EventHandler for Handler {
                         .as_ref()
                         .expect("Expected user object");
 
-                    if let ApplicationCommandInteractionDataOptionValue::User(user, _member) =
-                        options
-                    {
+                    if let CommandDataOptionValue::User(user, _member) = options {
                         format!("{}'s id is {}", user.tag(), user.id)
                     } else {
                         "Please provide a valid user".to_string()
@@ -192,19 +188,23 @@ async fn main() {
     }
 
     #[hook]
-    async fn dispatch_error_hook(context: &Context, msg: &Message, error: DispatchError) {
-        match error {
-            DispatchError::NotEnoughArguments { min, given } => {
-                let s = format!("Need {} arguments, but only got {}.", min, given);
-
-                let _ = msg.channel_id.say(&context, &s).await;
+    async fn dispatch_error(
+        ctx: &Context,
+        msg: &Message,
+        error: DispatchError,
+        _command_name: &str,
+    ) {
+        if let DispatchError::Ratelimited(info) = error {
+            // We notify them only once.
+            if info.is_first_try {
+                let _ = msg
+                    .channel_id
+                    .say(
+                        &ctx.http,
+                        &format!("Try this again in {} seconds.", info.as_secs()),
+                    )
+                    .await;
             }
-            DispatchError::TooManyArguments { max, given } => {
-                let s = format!("Max arguments allowed is {}, but got {}.", max, given);
-
-                let _ = msg.channel_id.say(&context, &s).await;
-            }
-            _ => println!("Unhandled dispatch error."),
         }
     }
 
@@ -252,7 +252,7 @@ async fn main() {
     let alphavantage_token =
         env::var("ALPHAVANTAGE").expect("Failed to retrieve alphavantage API token.");
     let database_url = env::var("DATABASE_URL").expect("Unable to read Database URL.");
-    let http = Http::new_with_token(&token);
+    let http = Http::new(&token);
 
     // Create DB client
     let connection_manager: diesel::r2d2::ConnectionManager<diesel::pg::PgConnection> =
@@ -276,13 +276,19 @@ async fn main() {
 
     run_migrations(&mut db_client).ok();
 
-    // We will fetch your bot's owners and id
-    let (owners, _bot_id) = match http.get_current_application_info().await {
+    // Fetch bot's owners and id
+    let (owners, bot_id) = match http.get_current_application_info().await {
         Ok(info) => {
             let mut owners = HashSet::new();
-            owners.insert(info.owner.id);
-
-            (owners, info.id)
+            if let Some(team) = info.team {
+                owners.insert(team.owner_user_id);
+            } else {
+                owners.insert(info.owner.id);
+            }
+            match http.get_current_user().await {
+                Ok(bot_id) => (owners, bot_id.id),
+                Err(why) => panic!("Could not access the bot id: {:?}", why),
+            }
         }
         Err(why) => panic!("Could not access application info: {:?}", why),
     };
@@ -293,7 +299,7 @@ async fn main() {
             c.owners(owners)
                 .prefix("~")
                 .allow_dm(true)
-                .on_mention(Some(_bot_id))
+                .on_mention(Some(bot_id))
                 .ignore_webhooks(true)
                 .ignore_bots(true)
                 .no_dm_prefix(true)
@@ -302,11 +308,14 @@ async fn main() {
         .before(before_hook)
         .after(after_hook)
         .unrecognised_command(unrecognized_command_hook)
-        .on_dispatch_error(dispatch_error_hook)
+        .on_dispatch_error(dispatch_error)
         .group(&GENERAL_GROUP)
         .help(&MY_HELP);
 
-    let mut client = Client::builder(&token)
+    let intents =
+        GatewayIntents::GUILDS | GatewayIntents::GUILD_MESSAGES | GatewayIntents::MESSAGE_CONTENT;
+
+    let mut client = Client::builder(&token, intents)
         .framework(framework)
         .application_id(app_id)
         .event_handler(Handler)
