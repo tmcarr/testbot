@@ -7,8 +7,8 @@ mod schema;
 
 #[macro_use]
 extern crate diesel;
-use diesel::pg::Pg;
-use diesel::r2d2::ManageConnection;
+// use diesel::pg::Pg;
+// use diesel::r2d2::ManageConnection;
 use dotenvy::dotenv;
 use serenity::{
     async_trait,
@@ -33,17 +33,17 @@ use serenity::{
     prelude::GatewayIntents,
     prelude::*,
 };
-use std::error::Error;
+// use std::error::Error;
 use std::{collections::HashSet, env, sync::Arc};
 use tracing::{error, info, instrument};
 use tracing_subscriber::{EnvFilter, FmtSubscriber};
 
 use commands::{
-    advice::*, ball::*, botsnack::*, desc::*, drink::*, food::*, github::*, owner::*, pingpong::*,
+    advice::*, ball::*, botsnack::*, drink::*, food::*, github::*, owner::*, pingpong::*,
     random::*, stonks::*,
 };
 
-use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
+// use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 
 struct ShardManagerContainer;
 impl TypeMapKey for ShardManagerContainer {
@@ -135,8 +135,8 @@ impl EventHandler for Handler {
     advice,
     ball,
     botsnack,
-    define,
-    describe,
+    // define,
+    // describe,
     // description,
     drink,
     fart,
@@ -152,7 +152,7 @@ impl EventHandler for Handler {
 
 struct General;
 
-pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
+// pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
 
 #[tokio::main]
 #[instrument]
@@ -251,30 +251,30 @@ async fn main() {
     let token = env::var("DISCORD_TOKEN").expect("Failed to load DISCORD_TOKEN from environment.");
     let alphavantage_token =
         env::var("ALPHAVANTAGE").expect("Failed to retrieve alphavantage API token.");
-    let database_url = env::var("DATABASE_URL").expect("Unable to read Database URL.");
+    // let database_url = env::var("DATABASE_URL").expect("Unable to read Database URL.");
     let http = Http::new(&token);
 
     // Create DB client
-    let connection_manager: diesel::r2d2::ConnectionManager<diesel::pg::PgConnection> =
-        diesel::r2d2::ConnectionManager::new(database_url);
+    // let connection_manager: diesel::r2d2::ConnectionManager<diesel::pg::PgConnection> =
+    //     diesel::r2d2::ConnectionManager::new(database_url);
 
-    let mut db_client: _ = connection_manager
-        .connect()
-        .expect("Could not connect to Postgres");
+    // let mut db_client: _ = connection_manager
+    //     .connect()
+    //     .expect("Could not connect to Postgres");
 
-    fn run_migrations(
-        connection: &mut impl MigrationHarness<Pg>,
-    ) -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
-        // This will run the necessary migrations.
-        //
-        // See the documentation for `MigrationHarness` for
-        // all available methods.
-        connection.run_pending_migrations(MIGRATIONS)?;
+    // fn run_migrations(
+    //     connection: &mut impl MigrationHarness<Pg>,
+    // ) -> Result<(), Box<dyn Error + Send + Sync + 'static>> {
+    //     // This will run the necessary migrations.
+    //     //
+    //     // See the documentation for `MigrationHarness` for
+    //     // all available methods.
+    //     connection.run_pending_migrations(MIGRATIONS)?;
 
-        Ok(())
-    }
+    //     Ok(())
+    // }
 
-    run_migrations(&mut db_client).ok();
+    // run_migrations(&mut db_client).ok();
 
     // Fetch bot's owners and id
     let (owners, bot_id) = match http.get_current_application_info().await {
@@ -326,7 +326,7 @@ async fn main() {
         let mut data = client.data.write().await;
         data.insert::<ShardManagerContainer>(client.shard_manager.clone());
         data.insert::<AlphaVantageApiToken>(alphavantage_token);
-        data.insert::<PostgresClient>(connection_manager);
+        // data.insert::<PostgresClient>(connection_manager);
     };
     if let Err(why) = client.start().await {
         error!("Client error: {:?}", why);
