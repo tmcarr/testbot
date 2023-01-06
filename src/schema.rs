@@ -1,6 +1,6 @@
-table! {
-    descriptions (key) {
-        key -> Text,
-        value -> Text,
-    }
-}
+// table! {
+//     descriptions (key) {
+//         key -> Text,
+//         value -> Text,
+//     }
+// }

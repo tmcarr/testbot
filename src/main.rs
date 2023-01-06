@@ -5,8 +5,8 @@ mod schema;
 // #[macro_use]
 // extern crate diesel_migrations;
 
-#[macro_use]
-extern crate diesel;
+// #[macro_use]
+// extern crate diesel;
 // use diesel::pg::Pg;
 // use diesel::r2d2::ManageConnection;
 use dotenvy::dotenv;
@@ -55,10 +55,10 @@ impl TypeMapKey for AlphaVantageApiToken {
     type Value = String;
 }
 
-struct PostgresClient;
-impl TypeMapKey for PostgresClient {
-    type Value = diesel::r2d2::ConnectionManager<diesel::pg::PgConnection>;
-}
+// struct PostgresClient;
+// impl TypeMapKey for PostgresClient {
+//     type Value = diesel::r2d2::ConnectionManager<diesel::pg::PgConnection>;
+// }
 
 struct Handler;
 
