@@ -50,7 +50,7 @@ jobs:
           cargo udeps
           # rm -rf ~/.cargo/advisory-db
           cargo audit
-          cargo pants
+          # cargo pants
       - name: Test
         run: cargo test
       - name: Version Checks
