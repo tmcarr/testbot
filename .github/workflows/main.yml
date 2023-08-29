@@ -45,7 +45,7 @@ jobs:
           cargo install --locked cargo-udeps || true
           cargo install --locked cargo-audit || true
           cargo install --locked cargo-pants || true
-      - name: Check
+      - name: Check Dependency Usage
         run: |
           cargo udeps
           # rm -rf ~/.cargo/advisory-db
