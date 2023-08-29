@@ -9,15 +9,15 @@ repository = "https://github.com/tmcarr/testbot"
 
 [dependencies]
 # env_logger = "0.9.0"
-log = "0.4.17"
+log = "0.4.20"
 rand = "0.8.5"
 # migrant_lib = "0.33.0"
-reqwest = { version = "0.11.16", features = ["blocking", "json"] }
-serde = { version = "1.0.159", features = ["derive"] }
-serde_json = "1.0.95"
-tokio = { version = "1.27.0", features = ["macros", "rt-multi-thread", "time"] }
+reqwest = { version = "0.11.20", features = ["blocking", "json"] }
+serde = { version = "1.0.188", features = ["derive"] }
+serde_json = "1.0.105"
+tokio = { version = "1.32.0", features = ["macros", "rt-multi-thread", "time"] }
 tracing = "0.1.37"
-tracing-subscriber = { version = "0.3.16", features = ["std", "env-filter"] }
+tracing-subscriber = { version = "0.3.17", features = ["std", "env-filter"] }
 dotenvy = "0.15.7"
 
 [dependencies.serenity]
@@ -36,7 +36,7 @@ features = [
     "rustls_backend",
     "unstable_discord_api"
 ]
-version = "0.11.5"
+version = "0.11.6"
 
 # [dependencies.diesel]
 # version = "2.0.2"
