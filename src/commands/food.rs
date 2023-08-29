@@ -8,7 +8,7 @@ use serenity::prelude::*;
 #[description = "Reply with a suggestion for cuisine."]
 #[usage = ""]
 async fn food(ctx: &Context, msg: &Message) -> CommandResult {
-    let responses = vec![
+    let responses = [
         "Asian", "Barbecue", "Burgers", "Italian", "Mexican", "Pho", "Pizza", "Steak", "Seafood",
         "Indian", "Cajun",
     ];

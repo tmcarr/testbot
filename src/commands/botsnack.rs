@@ -7,7 +7,7 @@ use serenity::prelude::*;
 #[description = "A bot's gotta eat...."]
 #[usage = ""]
 async fn botsnack(ctx: &Context, msg: &Message) -> CommandResult {
-    let responses = vec!["Yum!", "*cronch*", "MOAR", "*Smiles*", "Nice."];
+    let responses = ["Yum!", "*cronch*", "MOAR", "*Smiles*", "Nice."];
     let response = responses.choose(&mut rand::thread_rng()).unwrap();
 
     let _ = msg.channel_id.say(&ctx.http, response).await;
