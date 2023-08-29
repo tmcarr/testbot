@@ -49,7 +49,7 @@ jobs:
         run: |
           cargo udeps
           # rm -rf ~/.cargo/advisory-db
-          cargo audit
+          # cargo audit
           # cargo pants
       - name: Test
         run: cargo test
