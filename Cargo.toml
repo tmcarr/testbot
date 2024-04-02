@@ -12,7 +12,7 @@ repository = "https://github.com/tmcarr/testbot"
 log = "0.4.20"
 rand = "0.8.5"
 # migrant_lib = "0.33.0"
-reqwest = { version = "0.11.20", features = ["blocking", "json"] }
+reqwest = { version = "0.12.2", features = ["blocking", "json"] }
 serde = { version = "1.0.188", features = ["derive"] }
 serde_json = "1.0.105"
 tokio = { version = "1.32.0", features = ["macros", "rt-multi-thread", "time"] }

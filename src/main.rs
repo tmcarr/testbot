@@ -13,7 +13,6 @@ use dotenvy::dotenv;
 use serenity::{
     async_trait,
     client::bridge::gateway::ShardManager,
-    client::{Client, Context, EventHandler},
     framework::standard::macros::{group, help, hook},
     framework::standard::{
         help_commands, Args, CommandError, CommandGroup, CommandResult, DispatchError, HelpOptions,
@@ -30,7 +29,6 @@ use serenity::{
         id::GuildId,
         prelude::{interaction::InteractionResponseType, UserId},
     },
-    prelude::GatewayIntents,
     prelude::*,
 };
 // use std::error::Error;
