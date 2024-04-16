@@ -98,8 +98,7 @@ impl EventHandler for Handler {
                 "id" => {
                     let options = command
                         .data
-                        .options
-                        .get(0)
+                        .options.first()
                         .expect("Expected user option")
                         .resolved
                         .as_ref()
