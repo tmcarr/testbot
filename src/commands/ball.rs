@@ -1,4 +1,4 @@
-use rand::seq::SliceRandom;
+use rand::prelude::IteratorRandom;
 use serenity::framework::standard::{macros::command, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
@@ -31,8 +31,7 @@ async fn ball(ctx: &Context, msg: &Message) -> CommandResult {
         "You may rely on it.",
     ];
 
-    let choice = responses.choose(&mut rand::thread_rng()).unwrap();
-
+    let choice = responses.iter().choose(&mut rand::thread_rng()).unwrap();
     let _ = msg.channel_id.say(&ctx.http, choice).await;
 
     Ok(())

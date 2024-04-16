@@ -6,7 +6,7 @@ Toying around with Rust and the [serenity library](https://github.com/serenity-r
 
 ### Notes for M1 Macs:
 
-You need to use rustup to target x86 since some of diesel deps dont really like ARM yet.
+You need to use rustup to target x86 since some diesel deps don't really like ARM yet.
 
 ```
 rustup default nightly-x86_64-apple-darwin

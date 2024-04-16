@@ -274,7 +274,7 @@ async fn main() {
 
     // run_migrations(&mut db_client).ok();
 
-    // Fetch bot's owners and id
+    // Fetch bots owners and id
     let (owners, bot_id) = match http.get_current_application_info().await {
         Ok(info) => {
             let mut owners = HashSet::new();

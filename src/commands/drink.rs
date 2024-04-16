@@ -1,4 +1,4 @@
-use rand::seq::SliceRandom;
+use rand::seq::IteratorRandom;
 use serenity::framework::standard::{macros::command, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
@@ -25,7 +25,7 @@ async fn drink(ctx: &Context, msg: &Message) -> CommandResult {
         "Agua",
     ];
 
-    let drink = responses.choose(&mut rand::thread_rng()).unwrap();
+    let drink = responses.iter().choose(&mut rand::thread_rng()).unwrap();
 
     let _ = msg.channel_id.say(&ctx.http, drink).await;
 

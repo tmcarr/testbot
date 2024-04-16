@@ -1,4 +1,4 @@
-use rand::seq::SliceRandom;
+use rand::seq::IteratorRandom;
 use serenity::framework::standard::{macros::command, CommandResult};
 use serenity::model::prelude::*;
 use serenity::prelude::*;
@@ -13,7 +13,7 @@ async fn food(ctx: &Context, msg: &Message) -> CommandResult {
         "Indian", "Cajun",
     ];
 
-    let item = responses.choose(&mut rand::thread_rng()).unwrap();
+    let item = responses.iter().choose(&mut rand::thread_rng()).unwrap();
 
     let _ = msg.channel_id.say(&ctx.http, item).await;
 
