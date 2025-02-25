@@ -9,10 +9,10 @@ repository = "https://github.com/tmcarr/testbot"
 
 [dependencies]
 # env_logger = "0.9.0"
-log = "0.4.20"
-rand = "0.8.5"
+log = "0.4.26"
+rand = "0.9.0"
 # migrant_lib = "0.33.0"
-reqwest = { version = "0.12.5", features = ["blocking", "json"] }
+reqwest = { version = "0.12.12", features = ["blocking", "json"] }
 serde = { version = "1.0.188", features = ["derive"] }
 serde_json = "1.0.105"
 tokio = { version = "1.32.0", features = ["macros", "rt-multi-thread", "time"] }
