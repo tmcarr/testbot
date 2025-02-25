@@ -25,7 +25,7 @@ async fn drink(ctx: &Context, msg: &Message) -> CommandResult {
         "Agua",
     ];
 
-    let drink = responses.iter().choose(&mut rand::thread_rng()).unwrap();
+    let drink = responses.iter().choose(&mut rand::rng()).unwrap();
 
     let _ = msg.channel_id.say(&ctx.http, drink).await;
 

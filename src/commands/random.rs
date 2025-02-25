@@ -10,7 +10,7 @@ use serenity::prelude::*;
 async fn random(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
     let choices = args.raw().collect::<Vec<&str>>();
 
-    let thing = choices.iter().choose(&mut rand::thread_rng());
+    let thing = choices.iter().choose(&mut rand::rng());
 
     match thing {
         Some(choice) => msg.channel_id.say(&ctx.http, choice).await?,
