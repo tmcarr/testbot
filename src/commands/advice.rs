@@ -1,5 +1,5 @@
-use serde::Deserialize;
 use crate::{Context, Error};
+use serde::Deserialize;
 
 #[derive(Deserialize)]
 struct Slip {

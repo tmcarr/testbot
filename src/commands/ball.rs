@@ -1,5 +1,5 @@
-use rand::prelude::IteratorRandom;
 use crate::{Context, Error};
+use rand::prelude::IteratorRandom;
 
 /// Shakes the digital 8-ball.
 #[poise::command(slash_command, prefix_command)]

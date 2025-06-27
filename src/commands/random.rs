@@ -1,5 +1,5 @@
-use rand::prelude::IteratorRandom;
 use crate::{Context, Error};
+use rand::prelude::IteratorRandom;
 
 /// Choose a random item from the list of inputs
 #[poise::command(slash_command, prefix_command)]

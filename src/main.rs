@@ -59,7 +59,7 @@ This is an example bot made to showcase features for my friends",
 async fn main() {
     // Load environment variables
     dotenv().ok();
-    
+
     // Initialize the logger
     let subscriber = FmtSubscriber::builder()
         .with_env_filter(EnvFilter::from_default_env())
@@ -77,7 +77,6 @@ async fn main() {
             // Built-in commands
             register(),
             help(),
-            
             // Custom commands
             advice(),
             ball(),
@@ -112,7 +111,9 @@ async fn main() {
         on_error: |error| {
             Box::pin(async move {
                 match error {
-                    poise::FrameworkError::Setup { error, .. } => panic!("Failed to start bot: {:?}", error),
+                    poise::FrameworkError::Setup { error, .. } => {
+                        panic!("Failed to start bot: {:?}", error)
+                    }
                     poise::FrameworkError::Command { error, ctx, .. } => {
                         println!("Error in command `{}`: {:?}", ctx.command().name, error,);
                     }
@@ -133,14 +134,13 @@ async fn main() {
             Box::pin(async move {
                 println!("Logged in as {}", _ready.user.name);
                 poise::builtins::register_globally(ctx, &framework.options().commands).await?;
-                Ok(Data {
-                    alphavantage_token,
-                })
+                Ok(Data { alphavantage_token })
             })
         })
         .build();
 
-    let intents = poise::serenity_prelude::GatewayIntents::non_privileged() | poise::serenity_prelude::GatewayIntents::MESSAGE_CONTENT;
+    let intents = poise::serenity_prelude::GatewayIntents::non_privileged()
+        | poise::serenity_prelude::GatewayIntents::MESSAGE_CONTENT;
     let mut client = poise::serenity_prelude::ClientBuilder::new(token, intents)
         .framework(framework)
         .await

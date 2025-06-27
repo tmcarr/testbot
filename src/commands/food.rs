@@ -1,5 +1,5 @@
-use rand::seq::IteratorRandom;
 use crate::{Context, Error};
+use rand::seq::IteratorRandom;
 
 /// Reply with a suggestion for cuisine.
 #[poise::command(slash_command, prefix_command)]
