@@ -1,7 +1,6 @@
 use crate::diesel::prelude::*;
 use crate::diesel::QueryDsl;
 use crate::diesel::RunQueryDsl;
-// use crate::models::*;
 use crate::schema::descriptions::dsl::*;
 use crate::PostgresClient;
 use diesel::r2d2::ManageConnection;

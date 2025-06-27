@@ -1,13 +1,9 @@
 use rand::seq::IteratorRandom;
-use serenity::framework::standard::{macros::command, CommandResult};
-use serenity::model::prelude::*;
-use serenity::prelude::*;
+use crate::{Context, Error};
 
-#[command]
-#[aliases("drink", "drinks", "drank")]
-#[description = "Reply with a suggestion of fine beverage."]
-#[usage = ""]
-async fn drink(ctx: &Context, msg: &Message) -> CommandResult {
+/// Reply with a suggestion of fine beverage.
+#[poise::command(slash_command, prefix_command)]
+pub async fn drink(ctx: Context<'_>) -> Result<(), Error> {
     let responses = vec![
         "Water.",
         "Topo Chico",
@@ -27,7 +23,7 @@ async fn drink(ctx: &Context, msg: &Message) -> CommandResult {
 
     let drink = responses.iter().choose(&mut rand::rng()).unwrap();
 
-    let _ = msg.channel_id.say(&ctx.http, drink).await;
+    ctx.say(*drink).await?;
 
     Ok(())
 }

@@ -1,16 +1,13 @@
 use rand::seq::IteratorRandom;
-use serenity::framework::standard::{macros::command, CommandResult};
-use serenity::model::prelude::*;
-use serenity::prelude::*;
+use crate::{Context, Error};
 
-#[command]
-#[description = "A bot's gotta eat...."]
-#[usage = ""]
-async fn botsnack(ctx: &Context, msg: &Message) -> CommandResult {
+/// A bot's gotta eat....
+#[poise::command(slash_command, prefix_command)]
+pub async fn botsnack(ctx: Context<'_>) -> Result<(), Error> {
     let responses = ["Yum!", "*cronch*", "MOAR", "*Smiles*", "Nice."];
     let response = responses.iter().choose(&mut rand::rng()).unwrap();
 
-    let _ = msg.channel_id.say(&ctx.http, response).await;
+    ctx.say(*response).await?;
 
     Ok(())
 }

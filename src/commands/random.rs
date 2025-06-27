@@ -1,20 +1,19 @@
 use rand::prelude::IteratorRandom;
-use serenity::framework::standard::{macros::command, Args, CommandResult};
-use serenity::model::prelude::*;
-use serenity::prelude::*;
+use crate::{Context, Error};
 
-#[command]
-#[aliases("rand")]
-#[description = "Choose a random item from the list of inputs"]
-#[usage = "foo bar baz"]
-async fn random(ctx: &Context, msg: &Message, args: Args) -> CommandResult {
-    let choices = args.raw().collect::<Vec<&str>>();
+/// Choose a random item from the list of inputs
+#[poise::command(slash_command, prefix_command)]
+pub async fn random(
+    ctx: Context<'_>,
+    #[description = "Items to choose from"] items: String,
+) -> Result<(), Error> {
+    let choices: Vec<&str> = items.split_whitespace().collect();
 
     let thing = choices.iter().choose(&mut rand::rng());
 
     match thing {
-        Some(choice) => msg.channel_id.say(&ctx.http, choice).await?,
-        _ => msg.channel_id.say(&ctx.http, "Why u no args?!").await?,
+        Some(choice) => ctx.say(*choice).await?,
+        _ => ctx.say("Why u no args?!").await?,
     };
 
     Ok(())

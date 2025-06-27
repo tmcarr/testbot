@@ -1,20 +1,16 @@
 use rand::prelude::IteratorRandom;
-use serenity::framework::standard::{macros::command, CommandResult};
-use serenity::model::prelude::*;
-use serenity::prelude::*;
+use crate::{Context, Error};
 
-#[command]
-#[aliases("8ball")]
-#[description = "Shakes the digital 8-ball."]
-#[usage = ""]
-async fn ball(ctx: &Context, msg: &Message) -> CommandResult {
+/// Shakes the digital 8-ball.
+#[poise::command(slash_command, prefix_command)]
+pub async fn ball(ctx: Context<'_>) -> Result<(), Error> {
     let responses = vec![
         "As I see it, yes.",
         "Ask again later.",
         "Better not tell you now.",
         "Cannot predict now.",
         "Concentrate and ask again.",
-        "Don’t count on it.",
+        "Don't count on it.",
         "It is certain.",
         "It is decidedly so.",
         "Most likely.",
@@ -32,7 +28,7 @@ async fn ball(ctx: &Context, msg: &Message) -> CommandResult {
     ];
 
     let choice = responses.iter().choose(&mut rand::rng()).unwrap();
-    let _ = msg.channel_id.say(&ctx.http, choice).await;
+    ctx.say(*choice).await?;
 
     Ok(())
 }

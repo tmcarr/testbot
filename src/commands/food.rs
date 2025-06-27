@@ -1,13 +1,9 @@
 use rand::seq::IteratorRandom;
-use serenity::framework::standard::{macros::command, CommandResult};
-use serenity::model::prelude::*;
-use serenity::prelude::*;
+use crate::{Context, Error};
 
-#[command]
-#[aliases("cuisine", "dinner", "lunch", "breakfast", "snack")]
-#[description = "Reply with a suggestion for cuisine."]
-#[usage = ""]
-async fn food(ctx: &Context, msg: &Message) -> CommandResult {
+/// Reply with a suggestion for cuisine.
+#[poise::command(slash_command, prefix_command)]
+pub async fn food(ctx: Context<'_>) -> Result<(), Error> {
     let responses = [
         "Asian", "Barbecue", "Burgers", "Italian", "Mexican", "Pho", "Pizza", "Steak", "Seafood",
         "Indian", "Cajun",
@@ -15,7 +11,7 @@ async fn food(ctx: &Context, msg: &Message) -> CommandResult {
 
     let item = responses.iter().choose(&mut rand::rng()).unwrap();
 
-    let _ = msg.channel_id.say(&ctx.http, item).await;
+    ctx.say(*item).await?;
 
     Ok(())
 }

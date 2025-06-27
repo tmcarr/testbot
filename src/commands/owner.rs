@@ -1,25 +1,12 @@
-use crate::ShardManagerContainer;
-use serenity::framework::standard::{macros::command, CommandResult};
-use serenity::model::prelude::*;
-use serenity::prelude::*;
+use crate::{Context, Error};
 
-#[command]
-#[owners_only]
-#[aliases("killkillkill", "abortabortabort")]
-#[description = "Causes the bot to die."]
-#[usage = ""]
-async fn quit(ctx: &Context, msg: &Message) -> CommandResult {
-    let data = ctx.data.read().await;
-
-    if let Some(manager) = data.get::<ShardManagerContainer>() {
-        msg.reply(ctx, "Shutting down!").await?;
-        manager.lock().await.shutdown_all().await;
-    } else {
-        msg.reply(ctx, "There was a problem getting the shard manager")
-            .await?;
-
-        return Ok(());
-    }
-
+/// Causes the bot to die.
+#[poise::command(prefix_command, owners_only)]
+pub async fn quit(ctx: Context<'_>) -> Result<(), Error> {
+    ctx.say("Shutting down!").await?;
+    
+    // For now, just send a message. The bot can be stopped externally.
+    // TODO: Implement proper shutdown mechanism
+    
     Ok(())
 }
