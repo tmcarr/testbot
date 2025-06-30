@@ -24,9 +24,9 @@ pub async fn dogfact(ctx: Context<'_>) -> Result<(), Error> {
     // Fetch a random dog fact from the API
     let response = reqwest::get(ENDPOINT).await?;
 
-        if response.status().is_success() {
+    if response.status().is_success() {
         let dog_fact: DogFactResponse = response.json().await?;
-        
+
         if let Some(fact_data) = dog_fact.data.first() {
             ctx.say(&fact_data.attributes.body).await?;
         } else {
@@ -90,9 +90,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_dogfact_api_empty_response() {
-        let mock_response = DogFactResponse {
-            data: vec![],
-        };
+        let mock_response = DogFactResponse { data: vec![] };
 
         assert!(mock_response.data.is_empty());
         assert!(mock_response.data.first().is_none());
@@ -129,18 +127,21 @@ mod tests {
     fn test_dogfact_response_deserialization() {
         let json = r#"{"data": [{"id": "test", "type": "fact", "attributes": {"body": "Dogs are amazing animals!"}}]}"#;
         let result: Result<DogFactResponse, serde_json::Error> = serde_json::from_str(json);
-        
+
         assert!(result.is_ok());
         let response = result.unwrap();
         assert_eq!(response.data.len(), 1);
-        assert_eq!(response.data[0].attributes.body, "Dogs are amazing animals!");
+        assert_eq!(
+            response.data[0].attributes.body,
+            "Dogs are amazing animals!"
+        );
     }
 
     #[test]
     fn test_dogfact_response_deserialization_empty() {
         let json = r#"{"data": []}"#;
         let result: Result<DogFactResponse, serde_json::Error> = serde_json::from_str(json);
-        
+
         assert!(result.is_ok());
         let response = result.unwrap();
         assert_eq!(response.data.len(), 0);
@@ -150,7 +151,7 @@ mod tests {
     fn test_dogfact_response_deserialization_multiple() {
         let json = r#"{"data": [{"id": "1", "type": "fact", "attributes": {"body": "Fact 1"}}, {"id": "2", "type": "fact", "attributes": {"body": "Fact 2"}}, {"id": "3", "type": "fact", "attributes": {"body": "Fact 3"}}]}"#;
         let result: Result<DogFactResponse, serde_json::Error> = serde_json::from_str(json);
-        
+
         assert!(result.is_ok());
         let response = result.unwrap();
         assert_eq!(response.data.len(), 3);
@@ -170,11 +171,11 @@ mod tests {
     #[tokio::test]
     async fn test_mock_context_functionality() {
         let ctx = create_mock_context().await;
-        
+
         // Test that we can add messages
         ctx.say("Test message 1").await.unwrap();
         ctx.say("Test message 2").await.unwrap();
-        
+
         let messages = ctx.get_messages().await;
         assert_eq!(messages.len(), 2);
         assert_eq!(messages[0], "Test message 1");
@@ -185,7 +186,7 @@ mod tests {
     fn test_fallback_messages_contain_dog_facts() {
         let fallback_1 = "Sorry, couldn't fetch a dog fact right now. Here's one: Dogs have a sense of smell that is 40 times greater than humans! 🐕";
         let fallback_2 = "Sorry, the dog facts service is currently unavailable. Here's a dog fact: Dogs can hear sounds at frequencies up to 65,000 Hz! 🐕";
-        
+
         assert!(fallback_1.contains("dog fact"));
         assert!(fallback_1.contains("smell"));
         assert!(fallback_2.contains("dog fact"));
