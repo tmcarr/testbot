@@ -1,5 +1,5 @@
-use serde::Deserialize;
 use crate::{Context, Error};
+use serde::Deserialize;
 
 #[derive(Deserialize)]
 struct DogFactResponse {
@@ -10,13 +10,13 @@ struct DogFactResponse {
 #[poise::command(slash_command, prefix_command)]
 pub async fn dogfact(ctx: Context<'_>) -> Result<(), Error> {
     const ENDPOINT: &str = "https://dogapi.dog/api/v2/facts?number=1";
-    
+
     // Fetch a random dog fact from the API
     let response = reqwest::get(ENDPOINT).await?;
-    
+
     if response.status().is_success() {
         let dog_fact: DogFactResponse = response.json().await?;
-        
+
         if let Some(fact) = dog_fact.facts.first() {
             ctx.say(fact).await?;
         } else {
@@ -27,4 +27,4 @@ pub async fn dogfact(ctx: Context<'_>) -> Result<(), Error> {
     }
 
     Ok(())
-} 
+}

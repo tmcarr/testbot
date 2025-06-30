@@ -15,8 +15,8 @@ use tracing::instrument;
 use tracing_subscriber::{EnvFilter, FmtSubscriber};
 
 use commands::{
-    advice::*, ball::*, botsnack::*, dogfacts::*, drink::*, food::*, github::*, owner::*, pingpong::*,
-    random::*, stonks::*,
+    advice::*, ball::*, botsnack::*, dogfacts::*, drink::*, food::*, github::*, owner::*,
+    pingpong::*, random::*, stonks::*,
 };
 
 // use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
