@@ -15,7 +15,7 @@ use tracing::instrument;
 use tracing_subscriber::{EnvFilter, FmtSubscriber};
 
 use commands::{
-    advice::*, ball::*, botsnack::*, drink::*, food::*, github::*, owner::*, pingpong::*,
+    advice::*, ball::*, botsnack::*, dogfacts::*, drink::*, food::*, github::*, owner::*, pingpong::*,
     random::*, stonks::*,
 };
 
@@ -81,6 +81,7 @@ async fn main() {
             advice(),
             ball(),
             botsnack(),
+            dogfact(),
             drink(),
             fart(),
             food(),
