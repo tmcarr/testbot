@@ -89,7 +89,6 @@ async fn main() {
             ping(),
             quit(),
             random(),
-            stonkcomp(),
             stonks(),
         ],
         prefix_options: poise::PrefixFrameworkOptions {
